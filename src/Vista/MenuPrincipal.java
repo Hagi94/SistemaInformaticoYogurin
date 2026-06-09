@@ -14,15 +14,19 @@ public class MenuPrincipal extends javax.swing.JFrame {
      */
     public MenuPrincipal() {
         initComponents();
+        configurarEventos();
+    }
+
+    private void configurarEventos() {
         btnUsuarios.setText("Usuarios");
         btnUsuarios.addActionListener(this::btnUsuariosActionPerformed);
         btnProductos.setText("Productos");
         btnProductos.addActionListener(this::btnProductosActionPerformed);
         btnClientes.setText("Clientes");
         btnClientes.addActionListener(this::btnClientesActionPerformed);
-        btnInsumos.setText("Isumos");
+        btnInsumos.setText("Insumos");
         btnInsumos.addActionListener(this::btnInsumosActionPerformed);
-        btnProduccion.setText("Produccion");
+        btnProduccion.setText("Producción");
         btnProduccion.addActionListener(this::btnProduccionActionPerformed);
         btnVentas.setText("Ventas");
         btnVentas.addActionListener(this::btnVentasActionPerformed);
@@ -30,7 +34,7 @@ public class MenuPrincipal extends javax.swing.JFrame {
         btnInventario.addActionListener(this::btnInventarioActionPerformed);
         btnReportes.setText("Reportes");
         btnReportes.addActionListener(this::btnReportesActionPerformed);
-        btnCerrarSesion.setText("CerrarSesion");
+        btnCerrarSesion.setText("Cerrar sesión");
         btnCerrarSesion.addActionListener(this::btnCerrarSesionActionPerformed);
     }
 

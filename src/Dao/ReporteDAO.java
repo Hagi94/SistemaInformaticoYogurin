@@ -1,55 +1,41 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package Dao;
 
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.table.DefaultTableModel;
 
 public class ReporteDAO {
 
-    Connection con;
-    PreparedStatement ps;
-    ResultSet rs;
+    private static final Logger LOGGER = Logger.getLogger(ReporteDAO.class.getName());
 
-    public DefaultTableModel ventasDia(){
-
-        DefaultTableModel modelo =
-        new DefaultTableModel();
-
+    public DefaultTableModel ventasDia() {
+        DefaultTableModel modelo = new DefaultTableModel();
         modelo.addColumn("ID");
         modelo.addColumn("Fecha");
         modelo.addColumn("Cliente");
         modelo.addColumn("Total");
 
-        try{
+        String sql = "SELECT id,fecha,cliente_id,total FROM ventas WHERE DATE(fecha)=CURDATE()";
 
-            con = Conexion.conectar();
+        try (Connection con = Conexion.conectar();
+             PreparedStatement ps = con.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
 
-            String sql =
-            "SELECT * FROM ventas "
-            + "WHERE DATE(fecha)=CURDATE()";
-
-            ps = con.prepareStatement(sql);
-
-            rs = ps.executeQuery();
-
-            while(rs.next()){
-
+            while (rs.next()) {
                 modelo.addRow(new Object[]{
-
                     rs.getInt("id"),
                     rs.getString("fecha"),
                     rs.getInt("cliente_id"),
                     rs.getDouble("total")
-
                 });
             }
 
-        }catch(Exception e){
-
-            System.out.println(e.getMessage());
+        } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "Error al generar reporte de ventas del día", e);
         }
 
         return modelo;
