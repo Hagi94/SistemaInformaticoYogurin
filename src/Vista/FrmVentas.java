@@ -9,6 +9,7 @@ import Modelo.Cliente;
 import Modelo.Producto;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import javax.swing.JOptionPane;
 import javax.swing.table.DefaultTableModel;
 import java.time.LocalDate;
 import Dao.VentaDAO;
@@ -443,18 +444,18 @@ Object datos[] = {
 
     totalVenta += subtotal;
 
-    double descuento = 0;
+    double descuentoTotal = 0;
 
     if (!txtDescuento.getText().isEmpty()) {
 
-        descuento =
+        descuentoTotal =
                 Double.parseDouble(
                         txtDescuento.getText()
                 );
     }
 
     double totalFinal =
-            totalVenta - descuento;
+            totalVenta - descuentoTotal;
 
     txtTotal.setText(
             String.valueOf(totalFinal)
@@ -587,6 +588,7 @@ totalVenta = 0;
 
     return;
 }
+    int cantidad = Integer.parseInt(txtCantidad.getText().trim());
     if(cantidad <= 0){
 
     JOptionPane.showMessageDialog(
@@ -596,10 +598,7 @@ totalVenta = 0;
 
     return;
 }
-    ventaDAO.descontarStock(
-        productoId,
-        cantidad
-);
+    calcularSubtotal();
     }//GEN-LAST:event_txtCantidadActionPerformed
 
     /**

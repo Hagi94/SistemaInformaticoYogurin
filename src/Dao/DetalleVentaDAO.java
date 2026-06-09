@@ -1,45 +1,32 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package Dao;
 
 import Modelo.DetalleVenta;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class DetalleVentaDAO {
 
-    Connection con;
-    PreparedStatement ps;
+    private static final Logger LOGGER = Logger.getLogger(DetalleVentaDAO.class.getName());
 
     public boolean guardar(DetalleVenta d) {
+        String sql = "INSERT INTO detalle_venta (venta_id,producto_id,cantidad,precio_unitario,subtotal) VALUES(?,?,?,?,?)";
 
-        String sql =
-        "INSERT INTO detalle_venta "
-        + "(venta_id,producto_id,cantidad,precio_unitario,subtotal) "
-        + "VALUES(?,?,?,?,?)";
-
-        try {
-
-            con = Conexion.conectar();
-
-            ps = con.prepareStatement(sql);
+        try (Connection con = Conexion.conectar();
+             PreparedStatement ps = con.prepareStatement(sql)) {
 
             ps.setInt(1, d.getVentaId());
             ps.setInt(2, d.getProductoId());
             ps.setInt(3, d.getCantidad());
             ps.setDouble(4, d.getPrecioUnitario());
             ps.setDouble(5, d.getSubtotal());
-
             ps.executeUpdate();
-
             return true;
 
-        } catch (Exception e) {
-
-            System.out.println(e.getMessage());
-
+        } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "Error al guardar detalle de venta", e);
             return false;
         }
     }

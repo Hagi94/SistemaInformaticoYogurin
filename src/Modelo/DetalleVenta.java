@@ -6,10 +6,19 @@ package Modelo;
 
 public class DetalleVenta {
 
+    private int ventaId;
     private int productoId;
     private int cantidad;
     private double precioUnitario;
     private double subtotal;
+
+    public int getVentaId() {
+        return ventaId;
+    }
+
+    public void setVentaId(int ventaId) {
+        this.ventaId = ventaId;
+    }
 
     public int getProductoId() {
         return productoId;

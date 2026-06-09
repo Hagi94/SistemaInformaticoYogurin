@@ -4,6 +4,9 @@
  */
 package Vista;
 import Dao.UsuarioDAO;
+import Utilidades.Constantes;
+import Utilidades.Validaciones;
+import java.net.URL;
 import javax.swing.JOptionPane;
 /**
  *
@@ -18,6 +21,7 @@ public class LoginForm extends javax.swing.JFrame {
      */
     public LoginForm() {
         initComponents();
+        cargarImagenLogin();
     }
 
     /**
@@ -52,7 +56,7 @@ public class LoginForm extends javax.swing.JFrame {
         btnIngresar.setBorderPainted(false);
         btnIngresar.addActionListener(this::btnIngresarActionPerformed);
 
-        jLabel4.setIcon(new javax.swing.ImageIcon("D:\\ProyectosNetbeans\\SistemaInformatico\\src\\Imagenes\\Botones\\LoginForm.png")); // NOI18N
+        jLabel4.setIcon(null);
         jLabel4.setText("jLabel4");
         jLabel4.setVerticalAlignment(javax.swing.SwingConstants.BOTTOM);
         jLabel4.setPreferredSize(new java.awt.Dimension(434, 350));
@@ -111,36 +115,38 @@ public class LoginForm extends javax.swing.JFrame {
     }//GEN-LAST:event_txtClaveActionPerformed
 
     private void btnIngresarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnIngresarActionPerformed
- UsuarioDAO dao = new UsuarioDAO();
+        String usuario = txtUsuario.getText();
+        String clave = String.valueOf(txtClave.getPassword());
 
-String usuario = txtUsuario.getText();
+        if (!Validaciones.noEsVacio(usuario) || !Validaciones.noEsVacio(clave)) {
+            JOptionPane.showMessageDialog(this, "Debe ingresar usuario y contraseña.");
+            return;
+        }
 
-String clave = String.valueOf(
-        txtClave.getPassword()
-);
-
-if (dao.login(usuario, clave)) {
-
-    JOptionPane.showMessageDialog(
-            this,
-            "Bienvenido al sistema"
-    );
-
-    MenuPrincipal menu =
-            new MenuPrincipal();
-
-    menu.setVisible(true);
-
-    this.dispose();
-
-} else {
-
-    JOptionPane.showMessageDialog(
-            this,
-            "Usuario o contraseña incorrecta"
-    );
-}
+        try {
+            UsuarioDAO dao = new UsuarioDAO();
+            if (dao.login(usuario.trim(), clave)) {
+                JOptionPane.showMessageDialog(this, "Bienvenido al sistema");
+                MenuPrincipal menu = new MenuPrincipal();
+                menu.setVisible(true);
+                this.dispose();
+            } else {
+                JOptionPane.showMessageDialog(this, "Usuario o contraseña incorrecta");
+            }
+        } catch (RuntimeException e) {
+            logger.log(java.util.logging.Level.SEVERE, "Error durante el inicio de sesión", e);
+            JOptionPane.showMessageDialog(this, "No se pudo iniciar sesión. Verifique la conexión.");
+        }
     }//GEN-LAST:event_btnIngresarActionPerformed
+
+    private void cargarImagenLogin() {
+        URL imageUrl = getClass().getResource(Constantes.LOGIN_IMAGE_PATH);
+        if (imageUrl != null) {
+            jLabel4.setIcon(new javax.swing.ImageIcon(imageUrl));
+        } else {
+            logger.warning("No se encontró la imagen de login en: " + Constantes.LOGIN_IMAGE_PATH);
+        }
+    }
 
     /**
      * @param args the command line arguments
@@ -177,4 +183,3 @@ if (dao.login(usuario, clave)) {
     // End of variables declaration//GEN-END:variables
 
 }
-

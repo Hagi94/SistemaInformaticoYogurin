@@ -1,0 +1,19 @@
+# NetBeans / Ant
+build/
+dist/
+nbproject/private/
+nbproject/build-*.properties
+
+# Java
+*.class
+*.jar
+*.war
+*.ear
+
+# Logs & temporales
+*.log
+hs_err_pid*
+
+# OS
+.DS_Store
+Thumbs.db
