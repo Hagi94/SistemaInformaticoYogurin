@@ -4,35 +4,72 @@
  */
 package Modelo;
 
-import java.util.Date;
-
 public class Produccion {
 
     private int id;
-    private Date fecha;
+    private String fecha;
     private String lote;
     private String sabor;
     private int cantidad;
+    private double precioVenta;
     private String observacion;
 
     public Produccion() {
     }
 
-    public int getId() { return id; }
-    public void setId(int id) { this.id = id; }
+    public int getId() {
+        return id;
+    }
 
-    public Date getFecha() { return fecha; }
-    public void setFecha(Date fecha) { this.fecha = fecha; }
+    public void setId(int id) {
+        this.id = id;
+    }
 
-    public String getLote() { return lote; }
-    public void setLote(String lote) { this.lote = lote; }
+    public String getFecha() {
+        return fecha;
+    }
 
-    public String getSabor() { return sabor; }
-    public void setSabor(String sabor) { this.sabor = sabor; }
+    public void setFecha(String fecha) {
+        this.fecha = fecha;
+    }
 
-    public int getCantidad() { return cantidad; }
-    public void setCantidad(int cantidad) { this.cantidad = cantidad; }
+    public String getLote() {
+        return lote;
+    }
 
-    public String getObservacion() { return observacion; }
-    public void setObservacion(String observacion) { this.observacion = observacion; }
+    public void setLote(String lote) {
+        this.lote = lote;
+    }
+
+    public String getSabor() {
+        return sabor;
+    }
+
+    public void setSabor(String sabor) {
+        this.sabor = sabor;
+    }
+
+    public int getCantidad() {
+        return cantidad;
+    }
+
+    public void setCantidad(int cantidad) {
+        this.cantidad = cantidad;
+    }
+
+    public double getPrecioVenta() {
+        return precioVenta;
+    }
+
+    public void setPrecioVenta(double precioVenta) {
+        this.precioVenta = precioVenta;
+    }
+
+    public String getObservacion() {
+        return observacion;
+    }
+
+    public void setObservacion(String observacion) {
+        this.observacion = observacion;
+    }
 }

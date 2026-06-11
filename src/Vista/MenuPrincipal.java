@@ -14,24 +14,17 @@ public class MenuPrincipal extends javax.swing.JFrame {
      */
     public MenuPrincipal() {
         initComponents();
-        btnUsuarios.setText("Usuarios");
+        btnInsumos.setText("Insumos");
         btnUsuarios.addActionListener(this::btnUsuariosActionPerformed);
-        btnProductos.setText("Productos");
         btnProductos.addActionListener(this::btnProductosActionPerformed);
-        btnClientes.setText("Clientes");
         btnClientes.addActionListener(this::btnClientesActionPerformed);
-        btnInsumos.setText("Isumos");
         btnInsumos.addActionListener(this::btnInsumosActionPerformed);
-        btnProduccion.setText("Produccion");
         btnProduccion.addActionListener(this::btnProduccionActionPerformed);
-        btnVentas.setText("Ventas");
         btnVentas.addActionListener(this::btnVentasActionPerformed);
-        btnInventario.setText("Inventario");
         btnInventario.addActionListener(this::btnInventarioActionPerformed);
-        btnReportes.setText("Reportes");
         btnReportes.addActionListener(this::btnReportesActionPerformed);
-        btnCerrarSesion.setText("CerrarSesion");
         btnCerrarSesion.addActionListener(this::btnCerrarSesionActionPerformed);
+
     }
 
     /**
@@ -58,8 +51,10 @@ public class MenuPrincipal extends javax.swing.JFrame {
         btnUsuarios.setText("Usuarios");
 
         btnProductos.setText("Productos");
+        btnProductos.addActionListener(this::btnProductosActionPerformed);
 
-        btnInsumos.setText("Isumos");
+        btnInsumos.setText("Insumos");
+        btnInsumos.addActionListener(this::btnInsumosActionPerformed);
 
         btnProduccion.setText("Produccion");
 
@@ -93,7 +88,7 @@ public class MenuPrincipal extends javax.swing.JFrame {
                             .addComponent(btnClientes, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                             .addComponent(btnReportes, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
                     .addGroup(layout.createSequentialGroup()
-                        .addGap(131, 131, 131)
+                        .addGap(118, 118, 118)
                         .addComponent(btnCerrarSesion)))
                 .addContainerGap(73, Short.MAX_VALUE))
         );
@@ -116,34 +111,30 @@ public class MenuPrincipal extends javax.swing.JFrame {
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(btnProduccion)
                     .addComponent(btnReportes))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 33, Short.MAX_VALUE)
+                .addGap(18, 18, 18)
                 .addComponent(btnCerrarSesion)
-                .addGap(30, 30, 30))
+                .addContainerGap(45, Short.MAX_VALUE))
         );
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
+
+    private void btnInsumosActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnInsumosActionPerformed
+        new FrmInsumos().setVisible(true);
+    }//GEN-LAST:event_btnInsumosActionPerformed
+
+    private void btnProductosActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnProductosActionPerformed
+new FrmProductos().setVisible(true);    }//GEN-LAST:event_btnProductosActionPerformed
 private void btnUsuariosActionPerformed(java.awt.event.ActionEvent evt) {
 
     new FrmUsuarios().setVisible(true);
 
 }
 
-private void btnProductosActionPerformed(java.awt.event.ActionEvent evt) {
-
-    new FrmProductos().setVisible(true);
-
-}
 
 private void btnClientesActionPerformed(java.awt.event.ActionEvent evt) {
 
     new FrmClientes().setVisible(true);
-
-}
-
-private void btnInsumosActionPerformed(java.awt.event.ActionEvent evt) {
-
-    new FrmInsumos().setVisible(true);
 
 }
 
@@ -181,28 +172,6 @@ private void btnCerrarSesionActionPerformed(java.awt.event.ActionEvent evt) {
     /**
      * @param args the command line arguments
      */
-    public static void main(String args[]) {
-        /* Set the Nimbus look and feel */
-        //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
-        /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
-         * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
-         */
-        try {
-            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
-                if ("Nimbus".equals(info.getName())) {
-                    javax.swing.UIManager.setLookAndFeel(info.getClassName());
-                    break;
-                }
-            }
-        } catch (ReflectiveOperationException | javax.swing.UnsupportedLookAndFeelException ex) {
-            logger.log(java.util.logging.Level.SEVERE, null, ex);
-        }
-        //</editor-fold>
-
-        /* Create and display the form */
-        java.awt.EventQueue.invokeLater(() -> new MenuPrincipal().setVisible(true));
-    }
-
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnCerrarSesion;
     private javax.swing.JButton btnClientes;

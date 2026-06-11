@@ -45,9 +45,10 @@ public class VentaDAO {
             }
 
         } catch(Exception e){
-
-            System.out.println(e.getMessage());
-        }
+         e.printStackTrace();
+         
+}
+        
 
         return idVenta;
     }
@@ -134,4 +135,61 @@ public class VentaDAO {
         System.out.println(e.getMessage());
     }
 }
+  public void guardarDetalleLote(
+        int ventaId,
+        int produccionId,
+        String lote,
+        int cantidad,
+        double precio,
+        double subtotal) {
+
+    String sql =
+        "INSERT INTO detalle_venta_lote " +
+        "(venta_id,produccion_id,lote,cantidad,precio_unitario,subtotal) " +
+        "VALUES(?,?,?,?,?,?)";
+
+    try {
+
+        con = Conexion.conectar();
+        ps = con.prepareStatement(sql);
+
+        ps.setInt(1, ventaId);
+        ps.setInt(2, produccionId);
+        ps.setString(3, lote);
+        ps.setInt(4, cantidad);
+        ps.setDouble(5, precio);
+        ps.setDouble(6, subtotal);
+
+        ps.executeUpdate();
+
+    } catch (Exception e) {
+
+        System.out.println(e.getMessage());
+    }
+}
+
+public void descontarStockLote(
+        int produccionId,
+        int cantidad) {
+
+    String sql =
+        "UPDATE produccion " +
+        "SET cantidad = cantidad - ? " +
+        "WHERE id = ?";
+
+    try {
+
+        con = Conexion.conectar();
+        ps = con.prepareStatement(sql);
+
+        ps.setInt(1, cantidad);
+        ps.setInt(2, produccionId);
+
+        ps.executeUpdate();
+
+    } catch (Exception e) {
+
+        System.out.println(e.getMessage());
+    }
+}  
 }
