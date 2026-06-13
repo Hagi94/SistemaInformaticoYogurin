@@ -45,76 +45,42 @@ public class MenuPrincipal extends javax.swing.JFrame {
         btnInventario = new javax.swing.JButton();
         btnReportes = new javax.swing.JButton();
         btnCerrarSesion = new javax.swing.JButton();
+        lgoInicial = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        getContentPane().setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
         btnUsuarios.setText("Usuarios");
+        getContentPane().add(btnUsuarios, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 29, 91, -1));
 
         btnProductos.setText("Productos");
         btnProductos.addActionListener(this::btnProductosActionPerformed);
+        getContentPane().add(btnProductos, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 80, 91, -1));
 
         btnInsumos.setText("Insumos");
         btnInsumos.addActionListener(this::btnInsumosActionPerformed);
+        getContentPane().add(btnInsumos, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 133, 91, -1));
 
         btnProduccion.setText("Produccion");
+        getContentPane().add(btnProduccion, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 191, -1, -1));
 
         btnClientes.setText("Clientes");
+        getContentPane().add(btnClientes, new org.netbeans.lib.awtextra.AbsoluteConstraints(220, 29, 83, -1));
 
         btnVentas.setText("Ventas");
+        getContentPane().add(btnVentas, new org.netbeans.lib.awtextra.AbsoluteConstraints(220, 80, 83, -1));
 
         btnInventario.setText("Inventario");
+        getContentPane().add(btnInventario, new org.netbeans.lib.awtextra.AbsoluteConstraints(220, 133, -1, -1));
 
         btnReportes.setText("Reportes");
+        getContentPane().add(btnReportes, new org.netbeans.lib.awtextra.AbsoluteConstraints(220, 191, 83, -1));
 
         btnCerrarSesion.setText("Cerrar Sesion");
+        getContentPane().add(btnCerrarSesion, new org.netbeans.lib.awtextra.AbsoluteConstraints(118, 232, -1, -1));
 
-        javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
-        getContentPane().setLayout(layout);
-        layout.setHorizontalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(layout.createSequentialGroup()
-                        .addGap(30, 30, 30)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                            .addComponent(btnUsuarios, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(btnProductos, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(btnInsumos, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(btnProduccion, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                        .addGap(99, 99, 99)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                            .addComponent(btnInventario, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(btnVentas, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(btnClientes, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(btnReportes, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
-                    .addGroup(layout.createSequentialGroup()
-                        .addGap(118, 118, 118)
-                        .addComponent(btnCerrarSesion)))
-                .addContainerGap(73, Short.MAX_VALUE))
-        );
-        layout.setVerticalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
-                .addGap(29, 29, 29)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(btnUsuarios)
-                    .addComponent(btnClientes))
-                .addGap(28, 28, 28)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(btnProductos)
-                    .addComponent(btnVentas))
-                .addGap(30, 30, 30)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(btnInsumos)
-                    .addComponent(btnInventario))
-                .addGap(35, 35, 35)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(btnProduccion)
-                    .addComponent(btnReportes))
-                .addGap(18, 18, 18)
-                .addComponent(btnCerrarSesion)
-                .addContainerGap(45, Short.MAX_VALUE))
-        );
+        lgoInicial.setIcon(new javax.swing.ImageIcon("D:\\ProyectosNetbeans\\SistemaInformatico\\src\\Imagenes\\Botones\\LogoPrincipal.png")); // NOI18N
+        getContentPane().add(lgoInicial, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 380, 300));
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
@@ -182,5 +148,6 @@ private void btnCerrarSesionActionPerformed(java.awt.event.ActionEvent evt) {
     private javax.swing.JButton btnReportes;
     private javax.swing.JButton btnUsuarios;
     private javax.swing.JButton btnVentas;
+    private javax.swing.JLabel lgoInicial;
     // End of variables declaration//GEN-END:variables
 }

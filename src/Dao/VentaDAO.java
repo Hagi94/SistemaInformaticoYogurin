@@ -191,5 +191,6 @@ public void descontarStockLote(
 
         System.out.println(e.getMessage());
     }
-}  
+} 
+
 }

@@ -18,9 +18,14 @@ public class FrmReportes extends javax.swing.JFrame {
      */
     public FrmReportes() {
         initComponents();
-            btnVentasDia.addActionListener(
-    e -> cargarVentasDia()
-    );
+            btnVentasDia.addActionListener(e -> cargarVentasDia());
+            btnVentasMes.addActionListener(e -> cargarVentasMes());
+            btnProduccion.addActionListener(e -> cargarProduccion());
+            btnStockCritico.addActionListener(e -> cargarStockCritico());
+            btnCierreCaja.addActionListener(e -> cargarCierreCaja());
+            
+            btnExportarReporte.addActionListener(e -> exportarReporte());
+            btnCerrarReporte.addActionListener(e -> dispose());
         
     }
 
@@ -35,6 +40,85 @@ public class FrmReportes extends javax.swing.JFrame {
             dao.ventasDia()
     );
 }
+    private void cargarVentasMes(){
+    
+        tblReportes.setModel(dao.ventasMes());
+    }
+    
+    private void cargarProduccion() {
+        
+    tblReportes.setModel(dao.reporteProduccion());
+    }
+    
+    private void cargarStockCritico(){
+    
+        tblReportes.setModel(dao.stockCritico());
+    }
+    
+    private void cargarCierreCaja(){
+    
+        tblReportes.setModel(dao.cierreCaja());
+    }
+    
+    private void exportarReporte() {
+
+    try {
+
+        javax.swing.JFileChooser chooser =
+                new javax.swing.JFileChooser();
+
+        int opcion = chooser.showSaveDialog(this);
+
+        if (opcion == javax.swing.JFileChooser.APPROVE_OPTION) {
+
+            java.io.File archivo =
+                    chooser.getSelectedFile();
+
+            java.io.PrintWriter pw =
+                    new java.io.PrintWriter(archivo + ".csv");
+
+            for (int i = 0; i < tblReportes.getColumnCount(); i++) {
+
+                pw.print(tblReportes.getColumnName(i));
+
+                if (i < tblReportes.getColumnCount() - 1) {
+                    pw.print(",");
+                }
+            }
+
+            pw.println();
+
+            for (int fila = 0; fila < tblReportes.getRowCount(); fila++) {
+
+                for (int col = 0; col < tblReportes.getColumnCount(); col++) {
+
+                    pw.print(tblReportes.getValueAt(fila, col));
+
+                    if (col < tblReportes.getColumnCount() - 1) {
+                        pw.print(",");
+                    }
+                }
+
+                pw.println();
+            }
+
+            pw.close();
+
+            javax.swing.JOptionPane.showMessageDialog(
+                    this,
+                    "Reporte exportado correctamente"
+            );
+        }
+
+    } catch (Exception e) {
+
+        javax.swing.JOptionPane.showMessageDialog(
+                this,
+                "Error al exportar: " + e.getMessage()
+        );
+    }
+    }
+    
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
@@ -49,21 +133,29 @@ public class FrmReportes extends javax.swing.JFrame {
         tblReportes = new javax.swing.JTable();
         btnExportarReporte = new javax.swing.JButton();
         btnCerrarReporte = new javax.swing.JButton();
+        lgoReportes = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        getContentPane().setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
         jLabel1.setText("PANEL DE BOTONES DE REPORTES");
+        getContentPane().add(jLabel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(14, 14, -1, -1));
 
         btnVentasDia.setText("Ventas del Dia");
+        getContentPane().add(btnVentasDia, new org.netbeans.lib.awtextra.AbsoluteConstraints(14, 48, -1, -1));
 
         btnVentasMes.setText("Ventas Mensuales");
         btnVentasMes.addActionListener(this::btnVentasMesActionPerformed);
+        getContentPane().add(btnVentasMes, new org.netbeans.lib.awtextra.AbsoluteConstraints(139, 48, -1, -1));
 
         btnProduccion.setText("Produccion");
+        getContentPane().add(btnProduccion, new org.netbeans.lib.awtextra.AbsoluteConstraints(281, 48, -1, -1));
 
         btnStockCritico.setText("Stock Critico");
+        getContentPane().add(btnStockCritico, new org.netbeans.lib.awtextra.AbsoluteConstraints(388, 48, -1, -1));
 
         btnCierreCaja.setText("Cierre de Caja");
+        getContentPane().add(btnCierreCaja, new org.netbeans.lib.awtextra.AbsoluteConstraints(502, 48, -1, -1));
 
         tblReportes.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
@@ -78,62 +170,16 @@ public class FrmReportes extends javax.swing.JFrame {
         ));
         jScrollPane1.setViewportView(tblReportes);
 
+        getContentPane().add(jScrollPane1, new org.netbeans.lib.awtextra.AbsoluteConstraints(6, 83, 606, 275));
+
         btnExportarReporte.setText("Exportar Reporte");
+        getContentPane().add(btnExportarReporte, new org.netbeans.lib.awtextra.AbsoluteConstraints(161, 391, -1, -1));
 
         btnCerrarReporte.setText("Cerrar Ventana");
+        getContentPane().add(btnCerrarReporte, new org.netbeans.lib.awtextra.AbsoluteConstraints(379, 391, -1, -1));
 
-        javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
-        getContentPane().setLayout(layout);
-        layout.setHorizontalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(layout.createSequentialGroup()
-                        .addContainerGap()
-                        .addComponent(jScrollPane1))
-                    .addGroup(layout.createSequentialGroup()
-                        .addGap(14, 14, 14)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(layout.createSequentialGroup()
-                                .addComponent(btnVentasDia)
-                                .addGap(18, 18, 18)
-                                .addComponent(btnVentasMes)
-                                .addGap(18, 18, 18)
-                                .addComponent(btnProduccion)
-                                .addGap(18, 18, 18)
-                                .addComponent(btnStockCritico)
-                                .addGap(18, 18, 18)
-                                .addComponent(btnCierreCaja))
-                            .addComponent(jLabel1))
-                        .addGap(0, 6, Short.MAX_VALUE))
-                    .addGroup(layout.createSequentialGroup()
-                        .addGap(161, 161, 161)
-                        .addComponent(btnExportarReporte)
-                        .addGap(98, 98, 98)
-                        .addComponent(btnCerrarReporte)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
-                .addContainerGap())
-        );
-        layout.setVerticalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
-                .addGap(14, 14, 14)
-                .addComponent(jLabel1)
-                .addGap(18, 18, 18)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(btnVentasDia)
-                    .addComponent(btnVentasMes)
-                    .addComponent(btnProduccion)
-                    .addComponent(btnStockCritico)
-                    .addComponent(btnCierreCaja))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 275, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(33, 33, 33)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(btnExportarReporte)
-                    .addComponent(btnCerrarReporte))
-                .addContainerGap(37, Short.MAX_VALUE))
-        );
+        lgoReportes.setIcon(new javax.swing.ImageIcon("D:\\ProyectosNetbeans\\SistemaInformatico\\src\\Imagenes\\Botones\\LogoReporte.png")); // NOI18N
+        getContentPane().add(lgoReportes, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 620, 450));
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
@@ -177,6 +223,7 @@ public class FrmReportes extends javax.swing.JFrame {
     private javax.swing.JButton btnVentasMes;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JLabel lgoReportes;
     private javax.swing.JTable tblReportes;
     // End of variables declaration//GEN-END:variables
 }
