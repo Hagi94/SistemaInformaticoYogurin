@@ -109,17 +109,9 @@ private void limpiar() {
 
         jLabel5.setText("Correo :");
         getContentPane().add(jLabel5, new org.netbeans.lib.awtextra.AbsoluteConstraints(21, 186, 67, -1));
-
-        txtNombre.setText("Nombre");
         getContentPane().add(txtNombre, new org.netbeans.lib.awtextra.AbsoluteConstraints(94, 69, 264, -1));
-
-        txtTelefono.setText("Telefono");
         getContentPane().add(txtTelefono, new org.netbeans.lib.awtextra.AbsoluteConstraints(94, 103, 264, -1));
-
-        txtDireccion.setText("Direccion");
         getContentPane().add(txtDireccion, new org.netbeans.lib.awtextra.AbsoluteConstraints(94, 143, 264, -1));
-
-        txtCorreo.setText("Correo");
         getContentPane().add(txtCorreo, new org.netbeans.lib.awtextra.AbsoluteConstraints(94, 183, 264, -1));
 
         tblClientes.setModel(new javax.swing.table.DefaultTableModel(
@@ -161,7 +153,7 @@ private void limpiar() {
         btnBuscar.setText("Buscar");
         getContentPane().add(btnBuscar, new org.netbeans.lib.awtextra.AbsoluteConstraints(286, 239, -1, -1));
 
-        txtDni.setText("DNI");
+        txtDni.addActionListener(this::txtDniActionPerformed);
         getContentPane().add(txtDni, new org.netbeans.lib.awtextra.AbsoluteConstraints(94, 29, 71, -1));
 
         btnRegresar.setText("Regresar");
@@ -276,6 +268,10 @@ System.out.println("ID Cliente = " + idCliente);
     this.dispose();
 // TODO add your handling code here:
     }//GEN-LAST:event_btnRegresarActionPerformed
+
+    private void txtDniActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtDniActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_txtDniActionPerformed
 private void btnEliminarActionPerformed(java.awt.event.ActionEvent evt) {
 
 if (idCliente == 0) {

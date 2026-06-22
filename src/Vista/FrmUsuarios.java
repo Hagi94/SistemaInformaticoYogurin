@@ -278,8 +278,6 @@ public class FrmUsuarios extends javax.swing.JFrame {
 
         jLabel1.setText("ID :");
         getContentPane().add(jLabel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(23, 47, 37, -1));
-
-        txtId.setText("ID");
         getContentPane().add(txtId, new org.netbeans.lib.awtextra.AbsoluteConstraints(180, 44, 180, -1));
 
         jLabel2.setText("Usuario :");
@@ -287,11 +285,7 @@ public class FrmUsuarios extends javax.swing.JFrame {
 
         jLabel3.setText("Contrasena :");
         getContentPane().add(jLabel3, new org.netbeans.lib.awtextra.AbsoluteConstraints(23, 109, 80, -1));
-
-        txtUsuario.setText("Usuario");
         getContentPane().add(txtUsuario, new org.netbeans.lib.awtextra.AbsoluteConstraints(180, 72, 180, -1));
-
-        txtClave.setText("jTextField1");
         getContentPane().add(txtClave, new org.netbeans.lib.awtextra.AbsoluteConstraints(180, 106, 180, -1));
 
         jLabel4.setText("Rol :");
