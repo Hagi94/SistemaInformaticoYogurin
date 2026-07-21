@@ -4,7 +4,7 @@
  */
 package Vista;
 
-import Dao.ProduccionDAO;
+import controlador.ProduccionControlador;
 import Modelo.Produccion;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -14,7 +14,7 @@ import javax.swing.table.DefaultTableModel;
 
 public class FrmProduccion extends javax.swing.JFrame {
     
-    ProduccionDAO dao = new ProduccionDAO();
+    ProduccionControlador control = new ProduccionControlador(); // (luiggi) la vista solo habla con el controlador
     DefaultTableModel modelo = new DefaultTableModel();
     private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(FrmProduccion.class.getName());
 
@@ -81,7 +81,7 @@ public class FrmProduccion extends javax.swing.JFrame {
         btnRegresar = new javax.swing.JButton();
         lgoYogurin = new javax.swing.JLabel();
 
-        setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         getContentPane().setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
         jLabel1.setText("Fecha :");
@@ -163,7 +163,7 @@ public class FrmProduccion extends javax.swing.JFrame {
         btnRegresar.addActionListener(this::btnRegresarActionPerformed);
         getContentPane().add(btnRegresar, new org.netbeans.lib.awtextra.AbsoluteConstraints(290, 230, -1, -1));
 
-        lgoYogurin.setIcon(new javax.swing.ImageIcon("D:\\ProyectosNetbeans\\SistemaInformatico\\src\\Imagenes\\Botones\\LOGO.png")); // NOI18N
+        lgoYogurin.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Imagenes/Botones/LOGO.png"))); // NOI18N
         getContentPane().add(lgoYogurin, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, -1, 300));
 
         pack();
@@ -174,7 +174,7 @@ public class FrmProduccion extends javax.swing.JFrame {
         modelo = (DefaultTableModel) jTable1.getModel();
         modelo.setRowCount(0);
 
-        List<Produccion> lista = dao.listar();
+        List<Produccion> lista = control.listar();
 
         for (Produccion p : lista) {
             Object datos[] = {
@@ -204,68 +204,39 @@ public class FrmProduccion extends javax.swing.JFrame {
     }//GEN-LAST:event_txtSaborActionPerformed
 
     private void btnRegistrarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnRegistrarActionPerformed
- try {
-            // Validaciones
-            if (txtLote.getText().trim().isEmpty()) {
-                JOptionPane.showMessageDialog(this, "Ingrese el lote");
-                return;
-            }
-            if (txtSabor.getText().trim().isEmpty()) {
-                JOptionPane.showMessageDialog(this, "Ingrese el sabor");
-                return;
-            }
-            if (txtCantidad.getText().trim().isEmpty()) {
-                JOptionPane.showMessageDialog(this, "Ingrese la cantidad");
-                return;
-            }
-
-            Produccion p = new Produccion();
-            p.setFecha(txtFecha.getText());
-            p.setLote(txtLote.getText());
-            p.setSabor(txtSabor.getText());
-            p.setCantidad(Integer.parseInt(txtCantidad.getText()));
-            p.setObservacion(txtObservacion.getText());
-            p.setPrecioVenta(Double.parseDouble(txtPrecioVenta.getText()));
-
-            if (dao.guardar(p)) {
-                JOptionPane.showMessageDialog(this, "Producción registrada correctamente");
-                listarProduccion();
-                limpiarCampos();
-            } else {
-                JOptionPane.showMessageDialog(this, "Error al registrar");
-            }
-        } catch (NumberFormatException e) {
-            JOptionPane.showMessageDialog(this, "La cantidad debe ser un número válido");
-        }
+        // La vista entrega el texto; el controlador valida y ejecuta la transaccion
+        mostrar(control.registrarLote(                        // (luiggi) alta de lote (RF-09, RF-10)
+                txtFecha.getText(), txtLote.getText(), txtSabor.getText(),
+                txtCantidad.getText(), txtPrecioVenta.getText(), txtObservacion.getText(),
+                null));                                       // (luiggi) sin consumo de insumos por ahora
     }//GEN-LAST:event_btnRegistrarActionPerformed
 
     private void btnModificarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnModificarActionPerformed
-if (txtId.getText().isEmpty()) {
+
+        String id = txtId.getText();
+
+        if (id == null || id.isBlank()) {
             JOptionPane.showMessageDialog(this, "Seleccione un registro primero");
             return;
         }
 
-        try {
-            Produccion p = new Produccion();
-            p.setId(Integer.parseInt(txtId.getText()));
-            p.setFecha(txtFecha.getText());
-            p.setLote(txtLote.getText());
-            p.setSabor(txtSabor.getText());
-            p.setCantidad(Integer.parseInt(txtCantidad.getText()));
-            p.setObservacion(txtObservacion.getText());
-            p.setPrecioVenta(Double.parseDouble(txtPrecioVenta.getText()));
-
-            if (dao.modificar(p)) {
-                JOptionPane.showMessageDialog(this, "Producción modificada correctamente");
-                listarProduccion();
-                limpiarCampos();
-            } else {
-                JOptionPane.showMessageDialog(this, "Error al modificar");
-            }
-        } catch (NumberFormatException e) {
-            JOptionPane.showMessageDialog(this, "La cantidad debe ser un número válido");
-        }
+        mostrar(control.modificar(Integer.parseInt(id.trim()),
+                txtFecha.getText(), txtLote.getText(), txtSabor.getText(),
+                txtCantidad.getText(), txtPrecioVenta.getText(), txtObservacion.getText()));
     }//GEN-LAST:event_btnModificarActionPerformed
+
+    /** Muestra el mensaje del controlador y refresca la tabla si la operacion salio bien. */
+    private void mostrar(controlador.Resultado r) {
+
+        JOptionPane.showMessageDialog(this, r.getMensaje(),
+                r.esExito() ? "Listo" : "Atencion",
+                r.esExito() ? JOptionPane.INFORMATION_MESSAGE : JOptionPane.WARNING_MESSAGE);
+
+        if (r.esExito()) {
+            listarProduccion();
+            limpiarCampos();
+        }
+    }
 
     private void btnLimpiarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnLimpiarActionPerformed
 
@@ -283,13 +254,7 @@ if (txtId.getText().isEmpty()) {
                 JOptionPane.YES_NO_OPTION);
             
             if (confirm == JOptionPane.YES_OPTION) {
-                if (dao.eliminar(id)) {
-                    JOptionPane.showMessageDialog(this, "Producción eliminada correctamente");
-                    listarProduccion();
-                    limpiarCampos();
-                } else {
-                    JOptionPane.showMessageDialog(this, "Error al eliminar");
-                }
+                mostrar(control.eliminar(id));   // (luiggi) el controlador avisa si el lote tiene ventas
             }
         } catch (NumberFormatException e) {
             JOptionPane.showMessageDialog(this, "ID inválido");
@@ -318,10 +283,8 @@ if (txtId.getText().isEmpty()) {
     }//GEN-LAST:event_txtIdActionPerformed
 
     private void btnRegresarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnRegresarActionPerformed
-        MenuPrincipal menu = new MenuPrincipal();
-        menu.setVisible(true);
-
-        this.dispose();        // TODO add your handling code here:
+        // El menu principal sigue abierto detras; crear otro lo duplicaba
+        this.dispose();   // (luiggi) solo cierra esta ventana y vuelve al menu
     }//GEN-LAST:event_btnRegresarActionPerformed
 
     

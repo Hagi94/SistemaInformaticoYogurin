@@ -4,6 +4,7 @@
  */
 package Dao;
 
+import util.Conexion;
 import Modelo.Cliente;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -24,7 +25,7 @@ public class ClienteDAO {
 
         try {
 
-            con = Conexion.conectar();
+            con = Conexion.getInstancia().getConexion();
 
             ps = con.prepareStatement(sql);
 
@@ -55,7 +56,7 @@ public class ClienteDAO {
 
         try {
 
-            con = Conexion.conectar();
+            con = Conexion.getInstancia().getConexion();
 
             ps = con.prepareStatement(sql);
 
@@ -93,7 +94,7 @@ public class ClienteDAO {
 
         try {
 
-            con = Conexion.conectar();
+            con = Conexion.getInstancia().getConexion();
 
             ps = con.prepareStatement(sql);
 
@@ -123,7 +124,7 @@ public class ClienteDAO {
 
         try {
 
-            con = Conexion.conectar();
+            con = Conexion.getInstancia().getConexion();
 
             ps = con.prepareStatement(sql);
 
@@ -148,7 +149,7 @@ public class ClienteDAO {
 
     try {
 
-        con = Conexion.conectar();
+        con = Conexion.getInstancia().getConexion();
 
         ps = con.prepareStatement(sql);
 
@@ -181,7 +182,7 @@ public class ClienteDAO {
 
     try {
 
-        con = Conexion.conectar();
+        con = Conexion.getInstancia().getConexion();
 
         ps = con.prepareStatement(sql);
 
@@ -202,5 +203,67 @@ public class ClienteDAO {
 
     return c;
 }
+
+    /**
+     * Historial de compras de un cliente (RF-26).
+     * Une clientes, ventas, detalle_venta y productos para mostrar que compro y cuando.
+     */
+    public javax.swing.table.DefaultTableModel historialCompras(int idCliente) {
+
+        String[] columnas = {"N Venta", "Fecha", "Producto", "Cantidad", "P. Unitario", "Subtotal"};
+
+        javax.swing.table.DefaultTableModel modelo =
+                new javax.swing.table.DefaultTableModel(null, columnas) {
+            @Override
+            public boolean isCellEditable(int fila, int columna) {
+                return false;                                   // (luiggi) historial de solo lectura
+            }
+        };
+
+        String sql = "SELECT v.id, v.fecha, p.nombre, d.cantidad, d.precio_unitario, d.subtotal "
+                   + "FROM ventas v "
+                   + "INNER JOIN detalle_venta d ON d.venta_id = v.id "   // (luiggi) une la venta con su detalle
+                   + "INNER JOIN productos p ON p.id = d.producto_id "    // (luiggi) trae el nombre del producto
+                   + "WHERE v.cliente_id = ? "
+                   + "ORDER BY v.fecha DESC";
+
+        try (java.sql.PreparedStatement st =
+                     Conexion.getInstancia().getConexion().prepareStatement(sql)) {
+
+            st.setInt(1, idCliente);                            // (luiggi) parametrizado, evita inyeccion SQL
+
+            try (java.sql.ResultSet r = st.executeQuery()) {
+                while (r.next()) {
+                    modelo.addRow(new Object[]{
+                        r.getInt("id"), r.getString("fecha"), r.getString("nombre"),
+                        r.getInt("cantidad"), r.getDouble("precio_unitario"), r.getDouble("subtotal")
+                    });
+                }
+            }
+
+        } catch (java.sql.SQLException e) {
+            System.err.println("Error al cargar historial de compras: " + e.getMessage());
+        }
+        return modelo;
+    }
+
+    /** Cuenta cuantas compras registro un cliente, para mostrarlo en la ficha. */
+    public int contarCompras(int idCliente) {
+
+        String sql = "SELECT COUNT(*) AS total FROM ventas WHERE cliente_id = ?";
+
+        try (java.sql.PreparedStatement st =
+                     Conexion.getInstancia().getConexion().prepareStatement(sql)) {
+
+            st.setInt(1, idCliente);
+            try (java.sql.ResultSet r = st.executeQuery()) {
+                return r.next() ? r.getInt("total") : 0;         // (luiggi) 0 si el cliente no compro nunca
+            }
+
+        } catch (java.sql.SQLException e) {
+            System.err.println("Error al contar compras: " + e.getMessage());
+            return 0;
+        }
+    }
 
 }

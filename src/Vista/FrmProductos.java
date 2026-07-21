@@ -4,14 +4,14 @@
  */
 package Vista;
 
-import Dao.ProductoDAO;
+import controlador.ProductoControlador;
 import Modelo.Producto;
 import javax.swing.table.DefaultTableModel;
 import java.util.List;
 import javax.swing.JOptionPane;
 
 public class FrmProductos extends javax.swing.JFrame {
-    ProductoDAO dao = new ProductoDAO();
+    ProductoControlador control = new ProductoControlador(); // (luiggi) la vista solo habla con el controlador
     DefaultTableModel modelo = new DefaultTableModel();
     
     private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(FrmProductos.class.getName());
@@ -35,7 +35,7 @@ public class FrmProductos extends javax.swing.JFrame {
 
     modelo.setRowCount(0);
 
-    List<Producto> lista = dao.listar();
+    List<Producto> lista = control.listar();
 
     for (Producto p : lista) {
 
@@ -86,7 +86,7 @@ public class FrmProductos extends javax.swing.JFrame {
         btnRegresar = new javax.swing.JButton();
         lgoLogoProducto = new javax.swing.JLabel();
 
-        setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         getContentPane().setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
         jLabel1.setText("ID :");
@@ -148,7 +148,7 @@ public class FrmProductos extends javax.swing.JFrame {
         btnRegresar.addActionListener(this::btnRegresarActionPerformed);
         getContentPane().add(btnRegresar, new org.netbeans.lib.awtextra.AbsoluteConstraints(167, 267, -1, -1));
 
-        lgoLogoProducto.setIcon(new javax.swing.ImageIcon("D:\\ProyectosNetbeans\\SistemaInformatico\\src\\Imagenes\\Botones\\LogoNaranja.png")); // NOI18N
+        lgoLogoProducto.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Imagenes/Botones/LogoNaranja.png"))); // NOI18N
         getContentPane().add(lgoLogoProducto, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 1230, 350));
 
         pack();
@@ -156,83 +156,52 @@ public class FrmProductos extends javax.swing.JFrame {
 
     private void btnGuardarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnGuardarActionPerformed
 
-
-    Producto p = new Producto();
-
-    p.setNombre(txtNombre.getText());
-    p.setDescripcion(txtDescripcion.getText());
-    p.setPrecio(Double.parseDouble(txtPrecio.getText()));
-    p.setStock(Integer.parseInt(txtStock.getText()));
-    p.setEstado(true);
-
-    if (dao.guardar(p)) {
-
-        JOptionPane.showMessageDialog(
-                this,
-                "Producto guardado correctamente"
-        );
-
-        listarProductos();
-        limpiar();
-
-    } else {
-
-        JOptionPane.showMessageDialog(
-                this,
-                "Error al guardar"
-        );
-    }
+        // La vista entrega el texto; el controlador valida precio y stock
+        mostrar(control.registrar(                            // (luiggi) alta de producto (RF-04)
+                txtNombre.getText(), txtDescripcion.getText(),
+                txtPrecio.getText(), txtStock.getText(), true));
     }//GEN-LAST:event_btnGuardarActionPerformed
 
     private void btnModificarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnModificarActionPerformed
 
-    Producto p = new Producto();
+        String id = txtId.getText();
 
-    p.setId(Integer.parseInt(txtId.getText()));
-    p.setNombre(txtNombre.getText());
-    p.setDescripcion(txtDescripcion.getText());
-    p.setPrecio(Double.parseDouble(txtPrecio.getText()));
-    p.setStock(Integer.parseInt(txtStock.getText()));
+        if (id == null || id.isBlank()) {
+            JOptionPane.showMessageDialog(this, "Seleccione un producto de la tabla");
+            return;
+        }
 
-    if (dao.modificar(p)) {
-
-        JOptionPane.showMessageDialog(
-                this,
-                "Producto modificado"
-        );
-
-        listarProductos();
-        limpiar();
-    }
+        mostrar(control.modificar(Integer.parseInt(id.trim()),
+                txtNombre.getText(), txtDescripcion.getText(),
+                txtPrecio.getText(), txtStock.getText(), true)); // (luiggi) conserva el producto activo al modificar
     }//GEN-LAST:event_btnModificarActionPerformed
 
     private void btnEliminarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnEliminarActionPerformed
 
-    int fila = tblProductos.getSelectedRow();
+        int fila = tblProductos.getSelectedRow();
 
-    if (fila == -1) {
+        if (fila == -1) {
+            JOptionPane.showMessageDialog(this, "Seleccione un producto");
+            return;
+        }
 
-        JOptionPane.showMessageDialog(
-                this,
-                "Seleccione un producto"
-        );
+        int id = Integer.parseInt(tblProductos.getValueAt(fila, 0).toString());
 
-        return;
-    }
-
-    int id = Integer.parseInt(
-            tblProductos.getValueAt(fila, 0).toString()
-    );
-
-    dao.eliminar(id);
-
-    listarProductos();
-
-    JOptionPane.showMessageDialog(
-            this,
-            "Producto eliminado"
-    );
+        mostrar(control.eliminar(id));   // (luiggi) el controlador avisa si el producto tiene ventas
     }//GEN-LAST:event_btnEliminarActionPerformed
+
+    /** Muestra el mensaje del controlador y refresca la tabla si la operacion salio bien. */
+    private void mostrar(controlador.Resultado r) {
+
+        JOptionPane.showMessageDialog(this, r.getMensaje(),
+                r.esExito() ? "Listo" : "Atencion",
+                r.esExito() ? JOptionPane.INFORMATION_MESSAGE : JOptionPane.WARNING_MESSAGE);
+
+        if (r.esExito()) {
+            listarProductos();
+            limpiar();
+        }
+    }
 
     private void tblProductosMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_tblProductosMouseClicked
    int fila = tblProductos.getSelectedRow();
@@ -245,8 +214,8 @@ txtStock.setText(tblProductos.getValueAt(fila, 4).toString());
     }//GEN-LAST:event_tblProductosMouseClicked
 
     private void btnRegresarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnRegresarActionPerformed
-              MenuPrincipal menu  = new MenuPrincipal();
-       menu.setVisible(true);
+        // El menu principal sigue abierto detras; crear otro lo duplicaba
+        this.dispose();   // (luiggi) solo cierra esta ventana y vuelve al menu
     }//GEN-LAST:event_btnRegresarActionPerformed
 private void btnLimpiarActionPerformed(java.awt.event.ActionEvent evt) {
 

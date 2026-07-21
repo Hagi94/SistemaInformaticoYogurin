@@ -4,6 +4,7 @@
  */
 package Dao;
 
+import util.Conexion;
 import Modelo.DetalleVenta;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -22,7 +23,7 @@ public class DetalleVentaDAO {
 
         try {
 
-            con = Conexion.conectar();
+            con = Conexion.getInstancia().getConexion();
 
             ps = con.prepareStatement(sql);
 

@@ -3,14 +3,14 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JFrame.java to edit this template
  */
 package Vista;
-import Dao.ClienteDAO;
+import controlador.ClienteControlador;
 import Modelo.Cliente;
 import java.util.List;
 import javax.swing.JOptionPane;
 import javax.swing.table.DefaultTableModel;
 
 public class FrmClientes extends javax.swing.JFrame {
-    ClienteDAO dao = new ClienteDAO();
+    ClienteControlador control = new ClienteControlador(); // (luiggi) la vista solo habla con el controlador
 
 DefaultTableModel modelo = new DefaultTableModel();
 
@@ -35,7 +35,7 @@ private void listarClientes() {
 
     modelo.setRowCount(0);
 
-    List<Cliente> lista = dao.listar();
+    List<Cliente> lista = control.listar();
 
     for (Cliente c : lista) {
 
@@ -92,7 +92,7 @@ private void limpiar() {
         btnRegresar = new javax.swing.JButton();
         jLabel6 = new javax.swing.JLabel();
 
-        setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         getContentPane().setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
         jLabel1.setText("DNI :");
@@ -160,71 +160,39 @@ private void limpiar() {
         btnRegresar.addActionListener(this::btnRegresarActionPerformed);
         getContentPane().add(btnRegresar, new org.netbeans.lib.awtextra.AbsoluteConstraints(370, 239, -1, -1));
 
-        jLabel6.setIcon(new javax.swing.ImageIcon("D:\\ProyectosNetbeans\\SistemaInformatico\\src\\Imagenes\\Botones\\LogoNaranja.png")); // NOI18N
+        jLabel6.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Imagenes/Botones/LogoNaranja.png"))); // NOI18N
         getContentPane().add(jLabel6, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 1230, 300));
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
     private void btnGuardarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnGuardarActionPerformed
-Cliente c = new Cliente();
 
-    c.setDni(txtDni.getText());
-    c.setNombre(txtNombre.getText());
-    c.setTelefono(txtTelefono.getText());
-    c.setDireccion(txtDireccion.getText());
-    c.setCorreo(txtCorreo.getText());
-
-    if (dao.guardar(c)) {
-
-        JOptionPane.showMessageDialog(
-                this,
-                "Cliente guardado"
-        );
-
-        listarClientes();
-        limpiar();
-
-    } else {
-
-        JOptionPane.showMessageDialog(
-                this,
-                "Error al guardar"
-        );
-    }
+        // La vista entrega el texto; el controlador valida el DNI y el correo
+        mostrar(control.registrar(                            // (luiggi) alta de cliente (RF-11)
+                txtDni.getText(), txtNombre.getText(), txtTelefono.getText(),
+                txtDireccion.getText(), txtCorreo.getText()));
     }//GEN-LAST:event_btnGuardarActionPerformed
 
     private void btnModificarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnModificarActionPerformed
- if(idCliente == 0){
 
-        JOptionPane.showMessageDialog(
-                this,
-                "Seleccione un cliente de la tabla"
-        );
-
-        return;
-    }
-
-    Cliente c = new Cliente();
-
-    c.setId(idCliente);
-    c.setDni(txtDni.getText());
-    c.setNombre(txtNombre.getText());
-    c.setTelefono(txtTelefono.getText());
-    c.setDireccion(txtDireccion.getText());
-    c.setCorreo(txtCorreo.getText());
-
-    if(dao.modificar(c)){
-
-        JOptionPane.showMessageDialog(
-                this,
-                "Cliente modificado correctamente"
-        );
-
-        listarClientes();
-        limpiar();
-    }
+        mostrar(control.modificar(idCliente,
+                txtDni.getText(), txtNombre.getText(), txtTelefono.getText(),
+                txtDireccion.getText(), txtCorreo.getText()));
     }//GEN-LAST:event_btnModificarActionPerformed
+
+    /** Muestra el mensaje del controlador y refresca la tabla si la operacion salio bien. */
+    private void mostrar(controlador.Resultado r) {
+
+        JOptionPane.showMessageDialog(this, r.getMensaje(),
+                r.esExito() ? "Listo" : "Atencion",
+                r.esExito() ? JOptionPane.INFORMATION_MESSAGE : JOptionPane.WARNING_MESSAGE);
+
+        if (r.esExito()) {
+            listarClientes();
+            limpiar();                                        // (luiggi) deja el formulario listo para el siguiente
+        }
+    }
 
     private void tblClientesMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_tblClientesMouseClicked
 
@@ -262,11 +230,8 @@ System.out.println("ID Cliente = " + idCliente);
     }//GEN-LAST:event_btnGuardarMouseClicked
 
     private void btnRegresarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnRegresarActionPerformed
-    MenuPrincipal menu = new MenuPrincipal();
-    menu.setVisible(true);
-
-    this.dispose();
-// TODO add your handling code here:
+        // El menu principal sigue abierto detras; crear otro lo duplicaba
+        this.dispose();   // (luiggi) solo cierra esta ventana y vuelve al menu
     }//GEN-LAST:event_btnRegresarActionPerformed
 
     private void txtDniActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtDniActionPerformed
@@ -274,34 +239,14 @@ System.out.println("ID Cliente = " + idCliente);
     }//GEN-LAST:event_txtDniActionPerformed
 private void btnEliminarActionPerformed(java.awt.event.ActionEvent evt) {
 
-if (idCliente == 0) {
-
-        JOptionPane.showMessageDialog(
-                this,
-                "Seleccione un cliente"
-        );
-
-        return;
-    }
-
-    if (dao.eliminar(idCliente)) {
-
-        JOptionPane.showMessageDialog(
-                this,
-                "Cliente eliminado"
-        );
-
-        listarClientes();
-        limpiar();
-    }
+    // El controlador verifica que el cliente no tenga ventas antes de permitir borrarlo
+    mostrar(control.eliminar(idCliente));   // (luiggi) protege la integridad referencial
 }
 private void btnBuscarActionPerformed(java.awt.event.ActionEvent evt) {
 
-    Cliente c = dao.buscarPorDni(
-            txtDni.getText()
-    );
+    Cliente c = control.buscar(txtDni.getText());   // (luiggi) busca por DNI o por nombre (RF-12)
 
-    if (c.getId() > 0) {
+    if (c != null) {
 
         idCliente = c.getId();
 

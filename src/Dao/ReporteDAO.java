@@ -1,213 +1,217 @@
 package Dao;
 
-import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import javax.swing.table.DefaultTableModel;
+import util.Conexion;
 
+/**
+ * DAO de reportes (RF-19, RF-20, RF-21).
+ * Todas las consultas usan PreparedStatement parametrizado, lo que ademas previene inyeccion SQL.
+ */
 public class ReporteDAO {
 
-    Connection con;
-    PreparedStatement ps;
-    ResultSet rs;
+    private static final String[] COL_VENTAS =
+            {"ID", "Fecha", "Cliente", "Total"};
+    private static final String[] COL_PRODUCCION =
+            {"ID", "Fecha", "Lote", "Sabor", "Cantidad", "Precio"};
+    private static final String[] COL_STOCK =
+            {"ID", "Producto", "Stock actual", "Stock minimo"};
+    private static final String[] COL_INSUMOS =
+            {"ID", "Insumo", "Unidad", "Stock actual", "Stock minimo"};
+    private static final String[] COL_CIERRE =
+            {"Fecha", "N ventas", "Total recaudado"};
 
-    // VENTAS DEL DIA
+    private static final String SELECT_VENTAS =
+            "SELECT v.id, v.fecha, c.nombre, v.total_pagar "
+          + "FROM ventas v LEFT JOIN clientes c ON v.cliente_id = c.id ";
+
+    /** Ventas del dia actual (RF-20). */
     public DefaultTableModel ventasDia() {
-
-        DefaultTableModel modelo = new DefaultTableModel();
-
-        modelo.addColumn("ID");
-        modelo.addColumn("Fecha");
-        modelo.addColumn("Cliente");
-        modelo.addColumn("Total");
-
-        try {
-
-            con = Conexion.conectar();
-
-            String sql =
-                    "SELECT v.id, v.fecha, c.nombre, v.total_pagar " +
-                    "FROM ventas v " +
-                    "INNER JOIN clientes c ON v.cliente_id = c.id " +
-                    "WHERE DATE(v.fecha)=CURDATE()";
-
-            ps = con.prepareStatement(sql);
-            rs = ps.executeQuery();
-
-            while (rs.next()) {
-
-                modelo.addRow(new Object[]{
-                    rs.getInt("id"),
-                    rs.getString("fecha"),
-                    rs.getString("nombre"),
-                    rs.getDouble("total_pagar")
-                });
-            }
-
-        } catch (Exception e) {
-
-            System.out.println(e.getMessage());
-        }
-
-        return modelo;
+        return ventasPorRango(null, null, "DATE(v.fecha)=CURDATE()");
     }
 
-    // VENTAS DEL MES
+    /** Ventas de los ultimos 7 dias (RF-20). */
+    public DefaultTableModel ventasSemana() {
+        return ventasPorRango(null, null, "v.fecha >= DATE_SUB(CURDATE(), INTERVAL 7 DAY)");
+    }
+
+    /** Ventas del mes en curso (RF-20). */
     public DefaultTableModel ventasMes() {
-
-        DefaultTableModel modelo = new DefaultTableModel();
-
-        modelo.addColumn("ID");
-        modelo.addColumn("Fecha");
-        modelo.addColumn("Cliente");
-        modelo.addColumn("Total");
-
-        try {
-
-            con = Conexion.conectar();
-
-            String sql =
-                    "SELECT v.id, v.fecha, c.nombre, v.total_pagar " +
-                    "FROM ventas v " +
-                    "INNER JOIN clientes c ON v.cliente_id = c.id " +
-                    "WHERE MONTH(v.fecha)=MONTH(CURDATE()) " +
-                    "AND YEAR(v.fecha)=YEAR(CURDATE())";
-
-            ps = con.prepareStatement(sql);
-            rs = ps.executeQuery();
-
-            while (rs.next()) {
-
-                modelo.addRow(new Object[]{
-                    rs.getInt("id"),
-                    rs.getString("fecha"),
-                    rs.getString("nombre"),
-                    rs.getDouble("total_pagar")
-                });
-            }
-
-        } catch (Exception e) {
-
-            System.out.println(e.getMessage());
-        }
-
-        return modelo;
+        return ventasPorRango(null, null,
+                "MONTH(v.fecha)=MONTH(CURDATE()) AND YEAR(v.fecha)=YEAR(CURDATE())");
     }
 
-    // REPORTE PRODUCCION
+    /** Ventas entre dos fechas elegidas por el usuario (RF-20). */
+    public DefaultTableModel ventasPorRango(String fechaInicio, String fechaFin) {
+        return ventasPorRango(fechaInicio, fechaFin, "DATE(v.fecha) BETWEEN ? AND ?");
+    }
+
+    /** Reporte de lotes producidos. */
     public DefaultTableModel reporteProduccion() {
 
-        DefaultTableModel modelo = new DefaultTableModel();
+        DefaultTableModel modelo = crearModelo(COL_PRODUCCION);
+        String sql = "SELECT id,fecha,lote,sabor,cantidad,precio_venta FROM produccion ORDER BY fecha DESC";
 
-        modelo.addColumn("ID");
-        modelo.addColumn("Fecha");
-        modelo.addColumn("Lote");
-        modelo.addColumn("Sabor");
-        modelo.addColumn("Cantidad");
-        modelo.addColumn("Precio Venta");
-
-        try {
-
-            con = Conexion.conectar();
-
-            String sql = "SELECT * FROM produccion";
-
-            ps = con.prepareStatement(sql);
-            rs = ps.executeQuery();
+        try (PreparedStatement ps = Conexion.getInstancia().getConexion().prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
 
             while (rs.next()) {
-
                 modelo.addRow(new Object[]{
-                    rs.getInt("id"),
-                    rs.getDate("fecha"),
-                    rs.getString("lote"),
-                    rs.getString("sabor"),
-                    rs.getInt("cantidad"),
-                    rs.getDouble("precio_venta")
+                    rs.getInt("id"), rs.getString("fecha"), rs.getString("lote"),
+                    rs.getString("sabor"), rs.getInt("cantidad"), rs.getDouble("precio_venta")
                 });
             }
 
-        } catch (Exception e) {
-
-            System.out.println(e.getMessage());
+        } catch (SQLException e) {
+            System.err.println("Error en reporte de produccion: " + e.getMessage());
         }
-
         return modelo;
     }
 
-    // STOCK CRITICO
+    /** Productos que llegaron o bajaron de su stock minimo (RF-18). */
     public DefaultTableModel stockCritico() {
 
-        DefaultTableModel modelo = new DefaultTableModel();
+        DefaultTableModel modelo = crearModelo(COL_STOCK);
+        String sql = "SELECT id,nombre,stock,stock_minimo FROM productos "
+                   + "WHERE estado=1 AND stock <= stock_minimo ORDER BY stock"; // (luiggi) usa el minimo real, no un numero fijo
 
-        modelo.addColumn("ID");
-        modelo.addColumn("Producto");
-        modelo.addColumn("Stock");
-        modelo.addColumn("Precio");
-
-        try {
-
-            con = Conexion.conectar();
-
-            String sql =
-                    "SELECT * FROM productos " +
-                    "WHERE stock <= 10";
-
-            ps = con.prepareStatement(sql);
-            rs = ps.executeQuery();
+        try (PreparedStatement ps = Conexion.getInstancia().getConexion().prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
 
             while (rs.next()) {
-
                 modelo.addRow(new Object[]{
-                    rs.getInt("id"),
-                    rs.getString("nombre"),
-                    rs.getInt("stock"),
-                    rs.getDouble("precio")
+                    rs.getInt("id"), rs.getString("nombre"),
+                    rs.getInt("stock"), rs.getInt("stock_minimo")
                 });
             }
 
-        } catch (Exception e) {
-
-            System.out.println(e.getMessage());
+        } catch (SQLException e) {
+            System.err.println("Error en stock critico: " + e.getMessage());
         }
-
         return modelo;
     }
 
-    // CIERRE DE CAJA
-    public DefaultTableModel cierreCaja() {
+    /** Insumos que llegaron o bajaron de su stock minimo (RF-18). */
+    public DefaultTableModel insumosCriticos() {
 
-        DefaultTableModel modelo = new DefaultTableModel();
+        DefaultTableModel modelo = crearModelo(COL_INSUMOS);
+        String sql = "SELECT id,nombre,unidad,stock_actual,stock_minimo FROM insumos "
+                   + "WHERE stock_actual <= stock_minimo ORDER BY nombre";
 
-        modelo.addColumn("Fecha");
-        modelo.addColumn("Ventas del Día");
-
-        try {
-
-            con = Conexion.conectar();
-
-            String sql =
-                    "SELECT CURDATE() AS fecha, " +
-                    "IFNULL(SUM(total_pagar),0) AS total " +
-                    "FROM ventas " +
-                    "WHERE DATE(fecha)=CURDATE()";
-
-            ps = con.prepareStatement(sql);
-            rs = ps.executeQuery();
+        try (PreparedStatement ps = Conexion.getInstancia().getConexion().prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
 
             while (rs.next()) {
-
                 modelo.addRow(new Object[]{
-                    rs.getDate("fecha"),
-                    rs.getDouble("total")
+                    rs.getInt("id"), rs.getString("nombre"), rs.getString("unidad"),
+                    rs.getDouble("stock_actual"), rs.getDouble("stock_minimo")
                 });
             }
 
-        } catch (Exception e) {
-
-            System.out.println(e.getMessage());
+        } catch (SQLException e) {
+            System.err.println("Error en insumos criticos: " + e.getMessage());
         }
-
         return modelo;
+    }
+
+    /** Resumen de caja del dia: cantidad de ventas y total recaudado (RF-21). */
+    public DefaultTableModel cierreCaja() {
+
+        DefaultTableModel modelo = crearModelo(COL_CIERRE);
+        String sql = "SELECT CURDATE() AS fecha, COUNT(*) AS nventas, "
+                   + "IFNULL(SUM(total_pagar),0) AS total "
+                   + "FROM ventas WHERE DATE(fecha)=CURDATE()";
+
+        try (PreparedStatement ps = Conexion.getInstancia().getConexion().prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+
+            if (rs.next()) {
+                modelo.addRow(new Object[]{
+                    rs.getString("fecha"), rs.getInt("nventas"), rs.getDouble("total")
+                });
+            }
+
+        } catch (SQLException e) {
+            System.err.println("Error en cierre de caja: " + e.getMessage());
+        }
+        return modelo;
+    }
+
+    /** Guarda el cierre de caja del dia en la tabla 'cierre_caja' (RF-21). */
+    public boolean guardarCierreCaja(String observacion) {
+
+        String sql = "INSERT INTO cierre_caja(fecha,total_ventas,observacion) "
+                   + "SELECT CURDATE(), IFNULL(SUM(total_pagar),0), ? "
+                   + "FROM ventas WHERE DATE(fecha)=CURDATE()";
+
+        try (PreparedStatement ps = Conexion.getInstancia().getConexion().prepareStatement(sql)) {
+
+            ps.setString(1, observacion);
+            return ps.executeUpdate() > 0;                  // (luiggi) deja el cierre archivado del dia
+
+        } catch (SQLException e) {
+            System.err.println("Error al guardar cierre de caja: " + e.getMessage());
+            return false;
+        }
+    }
+
+    /** Total recaudado hoy, para mostrarlo como indicador en el dashboard (RF-19). */
+    public double totalRecaudadoHoy() {
+
+        String sql = "SELECT IFNULL(SUM(total_pagar),0) AS total FROM ventas WHERE DATE(fecha)=CURDATE()";
+
+        try (PreparedStatement ps = Conexion.getInstancia().getConexion().prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+
+            return rs.next() ? rs.getDouble("total") : 0;
+
+        } catch (SQLException e) {
+            System.err.println("Error al calcular el total del dia: " + e.getMessage());
+            return 0;
+        }
+    }
+
+    // ------------------------------------------------------------------
+    // Metodos privados de apoyo
+    // ------------------------------------------------------------------
+
+    /** Ejecuta el reporte de ventas aplicando la condicion recibida. */
+    private DefaultTableModel ventasPorRango(String desde, String hasta, String condicion) {
+
+        DefaultTableModel modelo = crearModelo(COL_VENTAS);
+        String sql = SELECT_VENTAS + "WHERE " + condicion + " ORDER BY v.fecha DESC";
+
+        try (PreparedStatement ps = Conexion.getInstancia().getConexion().prepareStatement(sql)) {
+
+            if (desde != null && hasta != null) {
+                ps.setString(1, desde);                     // (luiggi) fechas como parametros, no concatenadas
+                ps.setString(2, hasta);
+            }
+
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    modelo.addRow(new Object[]{
+                        rs.getInt("id"), rs.getString("fecha"),
+                        rs.getString("nombre"), rs.getDouble("total_pagar")
+                    });
+                }
+            }
+
+        } catch (SQLException e) {
+            System.err.println("Error en reporte de ventas: " + e.getMessage());
+        }
+        return modelo;
+    }
+
+    /** Crea un modelo de tabla de solo lectura con las columnas indicadas. */
+    private DefaultTableModel crearModelo(String[] columnas) {
+        return new DefaultTableModel(null, columnas) {
+            @Override
+            public boolean isCellEditable(int fila, int columna) {
+                return false;                               // (luiggi) los reportes no se editan a mano
+            }
+        };
     }
 }

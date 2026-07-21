@@ -7,7 +7,7 @@
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
 /*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
-/*!40101 SET NAMES utf8 */;
+/*!40101 SET NAMES utf8mb4 */;
 /*!40103 SET @OLD_TIME_ZONE=@@TIME_ZONE */;
 /*!40103 SET TIME_ZONE='+00:00' */;
 /*!40014 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0 */;
@@ -54,7 +54,8 @@ CREATE TABLE `clientes` (
   `telefono` varchar(20) DEFAULT NULL,
   `direccion` varchar(150) DEFAULT NULL,
   `correo` varchar(100) DEFAULT NULL,
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uk_clientes_dni` (`dni`)
 ) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -64,7 +65,7 @@ CREATE TABLE `clientes` (
 
 LOCK TABLES `clientes` WRITE;
 /*!40000 ALTER TABLE `clientes` DISABLE KEYS */;
-INSERT INTO `clientes` VALUES (1,'63158210','Hagi Bustamante Flores','224888999','Queti','hola@nosvemos'),(3,'12345678','Diego Hagi','999999999','Lima','prueba@gmail.com'),(4,'87654321','Hagi B.F','988888888','Huacho','consola@gmail.com'),(5,'00994466','Jack Flowers','998800998','Lima','Consuelo@utp.pe'),(6,'00000000','Jack Bustamante','123123123','Lima','inocente@gmail.com'),(7,'','Lugui','123123123','Lima','adm@gmail.com');
+INSERT INTO `clientes` VALUES (1,'63158210','Hagi Bustamante Flores','224888999','Queti','hola@nosvemos'),(3,'12345678','Diego Hagi','999999999','Lima','prueba@gmail.com'),(4,'87654321','Hagi B.F','988888888','Huacho','consola@gmail.com'),(5,'00994466','Jack Flowers','998800998','Lima','Consuelo@utp.pe'),(6,'00000000','Jack Bustamante','123123123','Lima','inocente@gmail.com'),(7,NULL,'Lugui','123123123','Lima','adm@gmail.com');
 /*!40000 ALTER TABLE `clientes` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -87,7 +88,7 @@ CREATE TABLE `detalle_venta` (
   KEY `producto_id` (`producto_id`),
   CONSTRAINT `detalle_venta_ibfk_1` FOREIGN KEY (`venta_id`) REFERENCES `ventas` (`id`),
   CONSTRAINT `detalle_venta_ibfk_2` FOREIGN KEY (`producto_id`) REFERENCES `productos` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=25 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -147,7 +148,7 @@ CREATE TABLE `insumos` (
   `stock_actual` decimal(10,2) DEFAULT 0.00,
   `stock_minimo` decimal(10,2) DEFAULT 0.00,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=13 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -156,6 +157,7 @@ CREATE TABLE `insumos` (
 
 LOCK TABLES `insumos` WRITE;
 /*!40000 ALTER TABLE `insumos` DISABLE KEYS */;
+INSERT INTO `insumos` VALUES (1,'Leche fresca','Litro',120.00,30.00),(2,'Azucar rubia','Kg',45.00,15.00),(3,'Cultivo lactico','Sobre',20.00,8.00),(4,'Envase 1L','Unidad',200.00,50.00),(5,'Envase 500ml','Unidad',150.00,50.00),(6,'Pulpa de fresa','Kg',18.00,10.00);
 /*!40000 ALTER TABLE `insumos` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -176,7 +178,7 @@ CREATE TABLE `movimientos_inventario` (
   PRIMARY KEY (`id`),
   KEY `producto_id` (`producto_id`),
   CONSTRAINT `movimientos_inventario_ibfk_1` FOREIGN KEY (`producto_id`) REFERENCES `productos` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=25 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -205,7 +207,7 @@ CREATE TABLE `produccion` (
   `observacion` varchar(200) DEFAULT NULL,
   `precio_venta` decimal(10,2) NOT NULL DEFAULT 2.50,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=20 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -216,6 +218,35 @@ LOCK TABLES `produccion` WRITE;
 /*!40000 ALTER TABLE `produccion` DISABLE KEYS */;
 INSERT INTO `produccion` VALUES (2,'2026-06-10','LT01-Junio','Yogur de tuna',85,'Ninguna',0.00),(3,'2026-06-10','LT02','Yogur Naranja',45,'Ninguna',0.00),(4,'2026-06-10','L03-Junio','Yogur Limon',40,'Ninguna',0.00),(5,'2026-06-10','LT04-Junio','Yogur Lucuma',50,'Ninguna',0.00),(6,'2026-06-10','LT05-Junio','Yogur Maracuya',50,'Ninguna',0.00),(7,'2026-06-10','LT06-Junio','Yogur Mango',58,'Ninguna',14.00);
 /*!40000 ALTER TABLE `produccion` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `produccion_insumo`
+--
+
+DROP TABLE IF EXISTS `produccion_insumo`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `produccion_insumo` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `produccion_id` int(11) NOT NULL,
+  `insumo_id` int(11) NOT NULL,
+  `cantidad_usada` decimal(10,2) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `idx_pi_produccion` (`produccion_id`),
+  KEY `idx_pi_insumo` (`insumo_id`),
+  CONSTRAINT `produccion_insumo_ibfk_1` FOREIGN KEY (`produccion_id`) REFERENCES `produccion` (`id`),
+  CONSTRAINT `produccion_insumo_ibfk_2` FOREIGN KEY (`insumo_id`) REFERENCES `insumos` (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `produccion_insumo`
+--
+
+LOCK TABLES `produccion_insumo` WRITE;
+/*!40000 ALTER TABLE `produccion_insumo` DISABLE KEYS */;
+/*!40000 ALTER TABLE `produccion_insumo` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
@@ -231,6 +262,7 @@ CREATE TABLE `productos` (
   `descripcion` varchar(200) DEFAULT NULL,
   `precio` decimal(10,2) NOT NULL,
   `stock` int(11) DEFAULT 0,
+  `stock_minimo` int(11) NOT NULL DEFAULT 10,
   `estado` tinyint(1) DEFAULT 1,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -242,7 +274,7 @@ CREATE TABLE `productos` (
 
 LOCK TABLES `productos` WRITE;
 /*!40000 ALTER TABLE `productos` DISABLE KEYS */;
-INSERT INTO `productos` VALUES (2,'Yogurt de fresa','Fresa',10.00,0,1),(3,'Yogurt Fresa','Botella 1L',10.50,80,1),(4,'Yogurt Durazno','Botella 1L',12.00,98,1),(5,'Yogurt Vainilla','Botella 1L',10.00,100,1),(6,'Yogurt de Pitahaya','Delicia',13.00,3,1);
+INSERT INTO `productos` VALUES (2,'Yogurt de fresa','Fresa',10.00,0,10,1),(3,'Yogurt Fresa','Botella 1L',10.50,80,10,1),(4,'Yogurt Durazno','Botella 1L',12.00,98,10,1),(5,'Yogurt Vainilla','Botella 1L',10.00,100,10,1),(6,'Yogurt de Pitahaya','Delicia',13.00,3,10,1);
 /*!40000 ALTER TABLE `productos` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -261,7 +293,7 @@ CREATE TABLE `usuarios` (
   `estado` tinyint(1) DEFAULT 1,
   PRIMARY KEY (`id`),
   UNIQUE KEY `usuario` (`usuario`)
-) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=11 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -270,7 +302,7 @@ CREATE TABLE `usuarios` (
 
 LOCK TABLES `usuarios` WRITE;
 /*!40000 ALTER TABLE `usuarios` DISABLE KEYS */;
-INSERT INTO `usuarios` VALUES (1,'admin','12345','Administrador',1),(2,'diego','1234','Administrador',1),(3,'HagiBF','1234','Vendedor',1),(5,'Jack','12345','Vendedor',1),(6,'','','Administrador',0);
+INSERT INTO `usuarios` VALUES (1,'admin','$2a$10$PPo2xNYjZZiLHR2ZatQ0M.NPPgEW9NzlAzKhTROnoAJ0IZRNkJCVe','Administrador',1),(2,'diego','$2a$10$R7Klba0DHdZVCFE/f8mYseiSaKKSHPSe2Kuaa7H1G893K6DCaEoZy','Administrador',1),(3,'HagiBF','$2a$10$XxXl4WGJvuT8YlB7cjxuxejKY9OF6pWFN.JhnLhSZR2c2aSNewU2W','Vendedor',1),(5,'Jack','$2a$10$LZc1Uqccbe1EyprukZ7gIuOYbh.jk7SkXQwr1g7oZ0cqNmCKuaaDu','Vendedor',1);
 /*!40000 ALTER TABLE `usuarios` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -291,7 +323,7 @@ CREATE TABLE `ventas` (
   PRIMARY KEY (`id`),
   KEY `cliente_id` (`cliente_id`),
   CONSTRAINT `ventas_ibfk_1` FOREIGN KEY (`cliente_id`) REFERENCES `clientes` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=17 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -303,6 +335,14 @@ LOCK TABLES `ventas` WRITE;
 INSERT INTO `ventas` VALUES (1,'2026-06-10 14:45:14',1,28.00,0.00,28.00),(2,'2026-06-11 17:00:14',6,24.00,0.00,24.00),(3,'2026-06-11 17:04:09',4,526.00,3.00,523.00),(4,'2026-06-12 20:34:45',7,105.00,0.00,105.00);
 /*!40000 ALTER TABLE `ventas` ENABLE KEYS */;
 UNLOCK TABLES;
+
+--
+-- Dumping events for database 'yogurin_bustamantedb'
+--
+
+--
+-- Dumping routines for database 'yogurin_bustamantedb'
+--
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
@@ -313,4 +353,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2026-06-22 12:53:41
+-- Dump completed on 2026-07-21 10:11:41

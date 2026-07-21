@@ -1,0 +1,695 @@
+<title>Diagramas del Capítulo 3 — Yogurin Bustamante</title>
+
+<style>
+  :root {
+    --ground: #FAF8F9;
+    --surface: #FFFFFF;
+    --panel: #FFFFFF;
+    --ink: #1F1A21;
+    --muted: #6F6473;
+    --hairline: #E2DAE2;
+    --accent: #9E2B4E;
+    --accent-soft: #F6E9ED;
+    --key: #16706B;
+    --key-soft: #E2F0EF;
+
+    --serif: 'Iowan Old Style', 'Palatino Linotype', Palatino, 'Book Antiqua', Georgia, serif;
+    --sans: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+    --mono: ui-monospace, 'Cascadia Mono', 'Consolas', 'SF Mono', monospace;
+
+    --measure: 68ch;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --ground: #161316;
+      --surface: #1E1A1F;
+      --ink: #ECE6EE;
+      --muted: #A599A9;
+      --hairline: #362F38;
+      --accent: #F0879F;
+      --accent-soft: #33202A;
+      --key: #6FC7C0;
+      --key-soft: #1B302F;
+    }
+  }
+
+  :root[data-theme="dark"] {
+    --ground: #161316;
+    --surface: #1E1A1F;
+    --ink: #ECE6EE;
+    --muted: #A599A9;
+    --hairline: #362F38;
+    --accent: #F0879F;
+    --accent-soft: #33202A;
+    --key: #6FC7C0;
+    --key-soft: #1B302F;
+  }
+
+  :root[data-theme="light"] {
+    --ground: #FAF8F9;
+    --surface: #FFFFFF;
+    --ink: #1F1A21;
+    --muted: #6F6473;
+    --hairline: #E2DAE2;
+    --accent: #9E2B4E;
+    --accent-soft: #F6E9ED;
+    --key: #16706B;
+    --key-soft: #E2F0EF;
+  }
+
+  body {
+    background: var(--ground);
+    color: var(--ink);
+    font-family: var(--sans);
+    font-size: 16px;
+    line-height: 1.6;
+    margin: 0;
+    padding: 0 1.25rem 6rem;
+  }
+
+  .wrap {
+    max-width: 74rem;
+    margin: 0 auto;
+  }
+
+  /* ---------- Encabezado ---------- */
+
+  header.doc {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    padding: 3.5rem 0 2rem;
+    border-bottom: 2px solid var(--ink);
+    margin-bottom: 2.5rem;
+  }
+
+  .eyebrow {
+    font-family: var(--mono);
+    font-size: 0.7rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--accent);
+  }
+
+  h1 {
+    font-family: var(--serif);
+    font-size: clamp(1.9rem, 1.3rem + 2.6vw, 3.1rem);
+    line-height: 1.1;
+    font-weight: 600;
+    margin: 0;
+    text-wrap: balance;
+    letter-spacing: -0.015em;
+  }
+
+  .sub {
+    max-width: var(--measure);
+    color: var(--muted);
+    margin: 0;
+  }
+
+  /* ---------- Nota de uso ---------- */
+
+  .nota {
+    display: grid;
+    gap: 0.5rem;
+    background: var(--accent-soft);
+    border-left: 3px solid var(--accent);
+    padding: 1.1rem 1.25rem;
+    margin-bottom: 3rem;
+    max-width: var(--measure);
+  }
+
+  .nota h2 {
+    font-family: var(--sans);
+    font-size: 0.78rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin: 0;
+    color: var(--accent);
+  }
+
+  .nota p { margin: 0; font-size: 0.93rem; }
+  .nota code {
+    font-family: var(--mono);
+    font-size: 0.86em;
+    background: var(--surface);
+    padding: 0.1em 0.4em;
+    border-radius: 2px;
+  }
+
+  /* ---------- Figuras ---------- */
+
+  figure.fig {
+    margin: 0 0 4rem;
+    display: grid;
+    gap: 0;
+  }
+
+  .fig-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0.6rem 0.9rem;
+    padding-bottom: 0.7rem;
+    border-bottom: 1px solid var(--hairline);
+    margin-bottom: 1.5rem;
+  }
+
+  .fig-num {
+    font-family: var(--mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--surface);
+    background: var(--accent);
+    padding: 0.28em 0.6em;
+    border-radius: 2px;
+    white-space: nowrap;
+  }
+
+  .fig-head h2 {
+    font-family: var(--serif);
+    font-size: clamp(1.25rem, 1.05rem + 0.8vw, 1.7rem);
+    font-weight: 600;
+    margin: 0;
+    letter-spacing: -0.01em;
+    flex: 1 1 18rem;
+  }
+
+  .seccion {
+    font-family: var(--mono);
+    font-size: 0.74rem;
+    color: var(--muted);
+    white-space: nowrap;
+  }
+
+  /* El lienzo del diagrama se mantiene claro en ambos temas:
+     es una figura impresa, y es lo que se pega en el Word. */
+  .lienzo {
+    background: #FFFFFF;
+    border: 1px solid var(--hairline);
+    border-radius: 3px;
+    padding: 1.75rem 1.25rem;
+    overflow-x: auto;
+  }
+
+  .lienzo pre.mermaid {
+    margin: 0;
+    background: transparent;
+    display: flex;
+    justify-content: center;
+    min-width: min-content;
+  }
+
+  figcaption {
+    font-size: 0.88rem;
+    color: var(--muted);
+    line-height: 1.55;
+    max-width: var(--measure);
+    margin-top: 0.9rem;
+  }
+
+  figcaption strong {
+    color: var(--ink);
+    font-weight: 600;
+  }
+
+  /* ---------- Tabla del diseño físico ---------- */
+
+  .tabla-envoltura { overflow-x: auto; }
+
+  table {
+    border-collapse: collapse;
+    width: 100%;
+    min-width: 38rem;
+    font-size: 0.9rem;
+    background: var(--surface);
+  }
+
+  caption {
+    text-align: left;
+    color: var(--muted);
+    font-size: 0.86rem;
+    padding-bottom: 0.6rem;
+  }
+
+  th, td {
+    text-align: left;
+    padding: 0.6rem 0.85rem;
+    border-bottom: 1px solid var(--hairline);
+    vertical-align: top;
+  }
+
+  thead th {
+    font-family: var(--sans);
+    font-size: 0.72rem;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    color: var(--muted);
+    border-bottom: 1.5px solid var(--ink);
+  }
+
+  tbody tr:last-child td { border-bottom: none; }
+
+  td.campo, td.tipo { font-family: var(--mono); font-size: 0.85rem; }
+  td.num { font-variant-numeric: tabular-nums; }
+
+  .badge {
+    display: inline-block;
+    font-family: var(--mono);
+    font-size: 0.68rem;
+    letter-spacing: 0.06em;
+    padding: 0.14em 0.45em;
+    border-radius: 2px;
+    white-space: nowrap;
+  }
+  .badge.pk { background: var(--accent-soft); color: var(--accent); }
+  .badge.fk { background: var(--key-soft); color: var(--key); }
+
+  /* ---------- Pie ---------- */
+
+  footer.doc {
+    border-top: 1px solid var(--hairline);
+    padding-top: 1.5rem;
+    margin-top: 1rem;
+    color: var(--muted);
+    font-size: 0.86rem;
+    max-width: var(--measure);
+  }
+
+  footer.doc p { margin: 0 0 0.6rem; }
+</style>
+
+<div class="wrap">
+
+  <header class="doc">
+    <span class="eyebrow">Capítulo 3 · Diseño e implementación</span>
+    <h1>Diagramas del sistema informático de Yogurin&nbsp;Bustamante</h1>
+    <p class="sub">
+      Figuras 2 a 5 del informe. Todas fueron derivadas del esquema real de la base de datos
+      <span style="font-family:var(--mono);font-size:0.9em">yogurin_bustamantedb</span>
+      y del código fuente del proyecto, no de una propuesta teórica.
+    </p>
+  </header>
+
+  <section class="nota">
+    <h2>Para insertarlas en el Word</h2>
+    <p>
+      El código fuente de cada figura está en <code>docs/diagramas/*.mmd</code>. Pégalo en
+      <code>mermaid.live</code> y usa <em>Actions → PNG</em> (o SVG, que se ve mejor impreso).
+      Así el diagrama queda editable si más adelante cambia el esquema.
+    </p>
+  </section>
+
+  <!-- ============ FIGURA 2 ============ -->
+  <figure class="fig">
+    <div class="fig-head">
+      <span class="fig-num">Figura 2</span>
+      <h2>Diagrama de clases</h2>
+      <span class="seccion">§ 3.1</span>
+    </div>
+
+    <div class="lienzo">
+<pre class="mermaid">
+classDiagram
+    direction LR
+
+    class Usuario {
+        -int id
+        -String usuario
+        -String clave
+        -String rol
+        -boolean estado
+        +getRol() String
+    }
+    class Cliente {
+        -int id
+        -String dni
+        -String nombre
+        -String telefono
+        -String direccion
+        -String correo
+    }
+    class Producto {
+        -int id
+        -String nombre
+        -String descripcion
+        -double precio
+        -int stock
+        -int stockMinimo
+        -boolean estado
+    }
+    class Insumo {
+        -int id
+        -String nombre
+        -String unidad
+        -double stockActual
+        -double stockMinimo
+    }
+    class Produccion {
+        -int id
+        -String fecha
+        -String lote
+        -String sabor
+        -int cantidad
+        -double precioVenta
+    }
+    class Venta {
+        -int id
+        -Date fecha
+        -int clienteId
+        -double total
+        -double descuento
+        -double totalPagar
+    }
+    class DetalleVenta {
+        -int ventaId
+        -int productoId
+        -int cantidad
+        -double precioUnitario
+        -double subtotal
+    }
+    class ItemVenta {
+        -String tipo
+        -int idItem
+        -String lote
+        -int cantidad
+        -double subtotal
+        +esProducto() boolean
+    }
+    class MovimientoInventario {
+        -int id
+        -Date fecha
+        -String tipo
+        -int productoId
+        -int cantidad
+    }
+    class CierreCaja {
+        -int id
+        -Date fecha
+        -double totalVentas
+    }
+
+    Cliente "1" --> "0..*" Venta : genera
+    Venta "1" *-- "1..*" DetalleVenta : contiene
+    DetalleVenta "0..*" --> "1" Producto : referencia
+    Venta "1" o-- "0..*" ItemVenta : arma
+    Produccion "0..*" --> "0..*" Insumo : consume
+    Producto "1" --> "0..*" MovimientoInventario : registra
+    Usuario "1" --> "0..*" Venta : atiende
+</pre>
+    </div>
+
+    <figcaption>
+      <strong>Figura 2.</strong> Diagrama de clases del modelo del dominio. Las diez clases del
+      paquete <span style="font-family:var(--mono)">Modelo</span> son POJO: atributos privados con
+      métodos <em>getter</em> y <em>setter</em>, sin lógica de negocio embebida. Su función es
+      transportar datos entre las capas. El rombo lleno entre <em>Venta</em> y <em>DetalleVenta</em>
+      indica composición: si se anula la venta, su detalle deja de existir.
+      Elaboración propia.
+    </figcaption>
+  </figure>
+
+  <!-- ============ FIGURA 3 ============ -->
+  <figure class="fig">
+    <div class="fig-head">
+      <span class="fig-num">Figura 3</span>
+      <h2>Modelo conceptual — entidad-relación</h2>
+      <span class="seccion">§ 3.2.1</span>
+    </div>
+
+    <div class="lienzo">
+<pre class="mermaid">
+erDiagram
+    CLIENTE ||--o{ VENTA : "genera"
+    USUARIO ||--o{ VENTA : "atiende"
+    VENTA ||--|{ DETALLE_VENTA : "contiene"
+    DETALLE_VENTA }o--|| PRODUCTO : "referencia"
+    VENTA ||--o{ DETALLE_VENTA_LOTE : "contiene"
+    DETALLE_VENTA_LOTE }o--|| PRODUCCION : "corresponde a"
+    PRODUCCION }o--o{ INSUMO : "consume"
+    PRODUCTO ||--o{ MOVIMIENTO_INVENTARIO : "registra"
+</pre>
+    </div>
+
+    <figcaption>
+      <strong>Figura 3.</strong> Modelo conceptual en notación entidad-relación, sin detalles de
+      implementación. Representa las ocho entidades del dominio y sus asociaciones. La relación
+      <em>Producción consume Insumo</em> es de muchos a muchos, y por eso en el modelo lógico se
+      resuelve con una tabla intermedia. Elaboración propia.
+    </figcaption>
+  </figure>
+
+  <!-- ============ FIGURA 4 ============ -->
+  <figure class="fig">
+    <div class="fig-head">
+      <span class="fig-num">Figura 4</span>
+      <h2>Modelo lógico — tablas, claves primarias y foráneas</h2>
+      <span class="seccion">§ 3.2.2</span>
+    </div>
+
+    <div class="lienzo">
+<pre class="mermaid">
+erDiagram
+    USUARIOS {
+        int id PK
+        varchar usuario UK
+        varchar clave
+        enum rol
+        tinyint estado
+    }
+    CLIENTES {
+        int id PK
+        varchar dni UK
+        varchar nombre
+        varchar telefono
+        varchar direccion
+        varchar correo
+    }
+    PRODUCTOS {
+        int id PK
+        varchar nombre
+        varchar descripcion
+        decimal precio
+        int stock
+        int stock_minimo
+        tinyint estado
+    }
+    INSUMOS {
+        int id PK
+        varchar nombre
+        varchar unidad
+        decimal stock_actual
+        decimal stock_minimo
+    }
+    PRODUCCION {
+        int id PK
+        date fecha
+        varchar lote
+        varchar sabor
+        int cantidad
+        decimal precio_venta
+    }
+    PRODUCCION_INSUMO {
+        int id PK
+        int produccion_id FK
+        int insumo_id FK
+        decimal cantidad_usada
+    }
+    VENTAS {
+        int id PK
+        datetime fecha
+        int cliente_id FK
+        decimal total
+        decimal descuento
+        decimal total_pagar
+    }
+    DETALLE_VENTA {
+        int id PK
+        int venta_id FK
+        int producto_id FK
+        int cantidad
+        decimal precio_unitario
+        decimal subtotal
+    }
+    DETALLE_VENTA_LOTE {
+        int id PK
+        int venta_id FK
+        int produccion_id FK
+        varchar lote
+        int cantidad
+        decimal subtotal
+    }
+    MOVIMIENTOS_INVENTARIO {
+        int id PK
+        datetime fecha
+        varchar tipo
+        int producto_id FK
+        int cantidad
+        varchar observacion
+    }
+    CIERRE_CAJA {
+        int id PK
+        date fecha
+        decimal total_ventas
+        varchar observacion
+    }
+
+    CLIENTES ||--o{ VENTAS : "cliente_id"
+    VENTAS ||--|{ DETALLE_VENTA : "venta_id"
+    PRODUCTOS ||--o{ DETALLE_VENTA : "producto_id"
+    VENTAS ||--o{ DETALLE_VENTA_LOTE : "venta_id"
+    PRODUCCION ||--o{ DETALLE_VENTA_LOTE : "produccion_id"
+    PRODUCCION ||--o{ PRODUCCION_INSUMO : "produccion_id"
+    INSUMOS ||--o{ PRODUCCION_INSUMO : "insumo_id"
+    PRODUCTOS ||--o{ MOVIMIENTOS_INVENTARIO : "producto_id"
+</pre>
+    </div>
+
+    <figcaption>
+      <strong>Figura 4.</strong> Modelo lógico con las once tablas relacionales, sus claves primarias
+      (PK), foráneas (FK) y únicas (UK). La tabla <em>produccion_insumo</em> resuelve la relación de
+      muchos a muchos entre producción e insumos, registrando además cuánto consumió cada lote.
+      Elaboración propia a partir del esquema real de la base de datos.
+    </figcaption>
+  </figure>
+
+  <!-- ============ DISEÑO FÍSICO ============ -->
+  <figure class="fig">
+    <div class="fig-head">
+      <span class="fig-num">Tabla 1</span>
+      <h2>Diseño físico — restricciones implementadas en MySQL</h2>
+      <span class="seccion">§ 3.2.3 · 3.2.4</span>
+    </div>
+
+    <div class="tabla-envoltura">
+      <table>
+        <caption>
+          Motor InnoDB · charset utf8mb4 · collation utf8mb4_general_ci · 11 tablas · 8 claves foráneas
+        </caption>
+        <thead>
+          <tr>
+            <th>Restricción</th>
+            <th>Dónde se aplica</th>
+            <th>Qué garantiza</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="campo"><span class="badge pk">PRIMARY KEY</span></td>
+            <td>Las 11 tablas, con <span class="campo">AUTO_INCREMENT</span></td>
+            <td>Unicidad de cada registro y generación automática del identificador</td>
+          </tr>
+          <tr>
+            <td class="campo"><span class="badge fk">FOREIGN KEY</span></td>
+            <td>8 relaciones entre tablas</td>
+            <td>Integridad referencial: no se elimina un producto con ventas registradas</td>
+          </tr>
+          <tr>
+            <td class="campo">UNIQUE</td>
+            <td><span class="campo">usuarios.usuario</span>, <span class="campo">clientes.dni</span></td>
+            <td>Impide usuarios duplicados y dos clientes con el mismo DNI</td>
+          </tr>
+          <tr>
+            <td class="campo">NOT NULL</td>
+            <td><span class="campo">nombre</span>, <span class="campo">precio</span>, <span class="campo">clave</span></td>
+            <td>Rechaza cualquier inserción que omita los campos obligatorios</td>
+          </tr>
+          <tr>
+            <td class="campo">ENUM</td>
+            <td><span class="campo">usuarios.rol</span></td>
+            <td>Solo admite «Administrador» o «Vendedor», validado por el motor</td>
+          </tr>
+          <tr>
+            <td class="campo">DEFAULT</td>
+            <td><span class="campo">stock</span> = 0 · <span class="campo">fecha</span> = CURRENT_TIMESTAMP</td>
+            <td>Valores iniciales y registro automático de la fecha y hora</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <figcaption>
+      <strong>Tabla 1.</strong> Restricciones de integridad definidas en el script DDL. La base de
+      datos está normalizada hasta la tercera forma normal; el precio unitario sí se almacena en
+      <em>detalle_venta</em> de forma deliberada, para conservar el precio histórico de cada venta
+      aunque el catálogo cambie después. Elaboración propia.
+    </figcaption>
+  </figure>
+
+  <!-- ============ FIGURA 5 ============ -->
+  <figure class="fig">
+    <div class="fig-head">
+      <span class="fig-num">Figura 5</span>
+      <h2>Arquitectura del sistema — patrón MVC + DAO</h2>
+      <span class="seccion">§ 3.3</span>
+    </div>
+
+    <div class="lienzo">
+<pre class="mermaid">
+flowchart TD
+    subgraph VISTA["VISTA · paquete Vista"]
+        V1["LoginForm · MenuPrincipal"]
+        V2["FrmVentas · FrmClientes · FrmProductos"]
+        V3["FrmInsumos · FrmProduccion · FrmReportes"]
+    end
+
+    subgraph CTRL["CONTROLADOR · paquete controlador"]
+        C1["UsuarioControlador · VentaControlador"]
+        C2["ClienteControlador · ProductoControlador"]
+        C3["InsumoControlador · ProduccionControlador"]
+        C4["ReporteControlador · RespaldoControlador"]
+    end
+
+    subgraph DAOS["DAO · paquete Dao"]
+        D1["UsuarioDAO · VentaDAO · ClienteDAO"]
+        D2["ProductoDAO · InsumoDAO · ProduccionDAO"]
+        D3["ReporteDAO · MovimientoInventarioDAO"]
+    end
+
+    subgraph UTILS["UTILIDADES · paquete util"]
+        U1["Conexion · Singleton"]
+        U2["Encriptador · SHA-256"]
+        U3["Sesion · ConfigBD · Respaldo"]
+    end
+
+    MOD["MODELO · paquete Modelo<br/>Usuario · Cliente · Producto · Insumo<br/>Produccion · Venta · DetalleVenta"]
+
+    BD[("MariaDB / MySQL<br/>yogurin_bustamantedb<br/>11 tablas InnoDB")]
+
+    VISTA -->|"texto del formulario"| CTRL
+    CTRL -->|"Resultado: exito y mensaje"| VISTA
+    CTRL -->|"objetos validados"| DAOS
+    DAOS -->|"JDBC transaccional"| BD
+    BD -->|"ResultSet"| DAOS
+
+    MOD -.-> VISTA
+    MOD -.-> CTRL
+    MOD -.-> DAOS
+
+    UTILS -.->|"conexion"| DAOS
+    UTILS -.->|"sesion y permisos"| CTRL
+</pre>
+    </div>
+
+    <figcaption>
+      <strong>Figura 5.</strong> Arquitectura en cinco capas. La vista entrega el texto de los
+      formularios sin validarlo; el controlador aplica las reglas de negocio y devuelve un objeto
+      <em>Resultado</em> con el mensaje que la vista muestra. Ninguna ventana accede directamente a
+      la capa DAO, y ningún controlador conoce la interfaz gráfica. Elaboración propia.
+    </figcaption>
+  </figure>
+
+  <footer class="doc">
+    <p>
+      Sistema Informático de Gestión de Ventas y Producción — Yogurin Bustamante, Sayán, 2026.
+      Java SE · Swing · MariaDB · JDBC · NetBeans IDE.
+    </p>
+    <p>
+      Las figuras reflejan el estado verificado del código y de la base de datos, no una propuesta
+      preliminar.
+    </p>
+  </footer>
+
+</div>

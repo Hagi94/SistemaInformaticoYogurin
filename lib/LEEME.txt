@@ -1,0 +1,12 @@
+CARPETA DE LIBRERIAS DEL PROYECTO
+=================================
+
+Coloca aqui el driver JDBC de MySQL con este nombre exacto:
+
+    mysql-connector-j-9.4.0.jar
+
+Descarga: https://dev.mysql.com/downloads/connector/j/  (opcion "Platform Independent")
+
+Antes, el proyecto apuntaba a C:\Users\hagi1\Downloads\, por lo que no compilaba
+en ninguna otra computadora. Ahora la ruta es relativa (lib/) y el proyecto
+funciona en cualquier PC del equipo con solo copiar el .jar en esta carpeta.

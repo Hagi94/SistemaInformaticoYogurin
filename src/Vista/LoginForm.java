@@ -3,7 +3,7 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JFrame.java to edit this template
  */
 package Vista;
-import Dao.UsuarioDAO;
+import controlador.UsuarioControlador;
 import javax.swing.JOptionPane;
 /**
  *
@@ -12,6 +12,8 @@ import javax.swing.JOptionPane;
 public class LoginForm extends javax.swing.JFrame {
     
     private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(LoginForm.class.getName());
+
+    private final UsuarioControlador control = new UsuarioControlador(); // (luiggi) la vista solo habla con el controlador
 
     /**
      * Creates new form LoginForm
@@ -52,7 +54,7 @@ public class LoginForm extends javax.swing.JFrame {
         btnIngresar.setBorderPainted(false);
         btnIngresar.addActionListener(this::btnIngresarActionPerformed);
 
-        jLabel4.setIcon(new javax.swing.ImageIcon("D:\\ProyectosNetbeans\\SistemaInformatico\\src\\Imagenes\\Botones\\LoginForm.png")); // NOI18N
+        jLabel4.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Imagenes/Botones/LoginForm.png"))); // NOI18N
         jLabel4.setText("jLabel4");
         jLabel4.setVerticalAlignment(javax.swing.SwingConstants.BOTTOM);
         jLabel4.setPreferredSize(new java.awt.Dimension(434, 350));
@@ -111,35 +113,22 @@ public class LoginForm extends javax.swing.JFrame {
     }//GEN-LAST:event_txtClaveActionPerformed
 
     private void btnIngresarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnIngresarActionPerformed
- UsuarioDAO dao = new UsuarioDAO();
+        String usuario = txtUsuario.getText();
+        String clave = String.valueOf(txtClave.getPassword());
 
-String usuario = txtUsuario.getText();
+        // La vista no valida ni consulta la BD: solo pide al controlador y muestra el resultado
+        controlador.Resultado r = control.iniciarSesion(usuario, clave); // (luiggi) el controlador valida y autentica
 
-String clave = String.valueOf(
-        txtClave.getPassword()
-);
+        if (!r.esExito()) {
+            JOptionPane.showMessageDialog(this, r.getMensaje());
+            txtClave.setText("");                              // (luiggi) limpia la clave tras el fallo
+            return;
+        }
 
-if (dao.login(usuario, clave)) {
+        JOptionPane.showMessageDialog(this, r.getMensaje());
 
-    JOptionPane.showMessageDialog(
-            this,
-            "Bienvenido al sistema"
-    );
-
-    MenuPrincipal menu =
-            new MenuPrincipal();
-
-    menu.setVisible(true);
-
-    this.dispose();
-
-} else {
-
-    JOptionPane.showMessageDialog(
-            this,
-            "Usuario o contraseña incorrecta"
-    );
-}
+        new MenuPrincipal().setVisible(true);                  // (luiggi) abre el menu segun el rol cargado
+        this.dispose();
     }//GEN-LAST:event_btnIngresarActionPerformed
 
     /**

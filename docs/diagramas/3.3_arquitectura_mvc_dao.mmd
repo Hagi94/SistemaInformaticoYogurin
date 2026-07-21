@@ -1,0 +1,48 @@
+flowchart TD
+
+    subgraph VISTA["VISTA - paquete Vista"]
+        V1["LoginForm - MenuPrincipal"]
+        V2["FrmVentas - FrmClientes - FrmProductos"]
+        V3["FrmInsumos - FrmProduccion - FrmReportes"]
+    end
+
+    subgraph CONTROLADOR["CONTROLADOR - paquete controlador"]
+        C1["UsuarioControlador - VentaControlador"]
+        C2["ClienteControlador - ProductoControlador"]
+        C3["InsumoControlador - ProduccionControlador"]
+        C4["ReporteControlador - RespaldoControlador"]
+        C5["Resultado - exito y mensaje"]
+    end
+
+    subgraph DAO["DAO - paquete Dao"]
+        D1["UsuarioDAO - VentaDAO - ClienteDAO"]
+        D2["ProductoDAO - InsumoDAO - ProduccionDAO"]
+        D3["ReporteDAO - MovimientoInventarioDAO"]
+    end
+
+    subgraph MODELO["MODELO - paquete Modelo"]
+        M1["Usuario - Cliente - Producto - Insumo"]
+        M2["Produccion - Venta - DetalleVenta - ItemVenta"]
+    end
+
+    subgraph UTIL["UTILIDADES - paquete util"]
+        U1["Conexion - Singleton"]
+        U2["Encriptador - SHA-256"]
+        U3["Sesion - usuario activo"]
+        U4["ConfigBD - Respaldo"]
+    end
+
+    BD[("MySQL 8.0 / MariaDB<br/>yogurin_bustamantedb<br/>11 tablas InnoDB")]
+
+    VISTA -->|"datos del formulario"| CONTROLADOR
+    CONTROLADOR -->|"Resultado: exito y mensaje"| VISTA
+    CONTROLADOR -->|"objetos validados"| DAO
+    DAO -->|"JDBC transaccional"| BD
+    BD -->|"ResultSet"| DAO
+
+    MODELO -.->|"transporta datos"| VISTA
+    MODELO -.-> CONTROLADOR
+    MODELO -.-> DAO
+
+    UTIL -.->|"conexion y seguridad"| DAO
+    UTIL -.->|"sesion y permisos"| CONTROLADOR

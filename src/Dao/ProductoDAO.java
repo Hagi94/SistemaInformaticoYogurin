@@ -4,6 +4,7 @@
  */
 package Dao;
 
+import util.Conexion;
 import Modelo.Producto;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -24,7 +25,7 @@ public class ProductoDAO {
 
         try {
 
-            con = Conexion.conectar();
+            con = Conexion.getInstancia().getConexion();
             ps = con.prepareStatement(sql);
 
             ps.setString(1, p.getNombre());
@@ -54,7 +55,7 @@ public class ProductoDAO {
 
         try {
 
-            con = Conexion.conectar();
+            con = Conexion.getInstancia().getConexion();
             ps = con.prepareStatement(sql);
             rs = ps.executeQuery();
 
@@ -89,7 +90,7 @@ public class ProductoDAO {
 
         try {
 
-            con = Conexion.conectar();
+            con = Conexion.getInstancia().getConexion();
             ps = con.prepareStatement(sql);
 
             ps.setString(1, p.getNombre());
@@ -117,7 +118,7 @@ public class ProductoDAO {
 
         try {
 
-            con = Conexion.conectar();
+            con = Conexion.getInstancia().getConexion();
             ps = con.prepareStatement(sql);
 
             ps.setInt(1, id);
@@ -143,7 +144,7 @@ public class ProductoDAO {
 
         try {
 
-            con = Conexion.conectar();
+            con = Conexion.getInstancia().getConexion();
             ps = con.prepareStatement(sql);
 
             ps.setInt(1, id);
@@ -175,7 +176,7 @@ public class ProductoDAO {
 
     try {
 
-        con = Conexion.conectar();
+        con = Conexion.getInstancia().getConexion();
 
         ps = con.prepareStatement(sql);
 

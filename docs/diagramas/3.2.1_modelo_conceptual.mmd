@@ -1,0 +1,10 @@
+erDiagram
+    CLIENTE ||--o{ VENTA : "genera"
+    VENTA ||--|{ DETALLE_VENTA : "contiene"
+    DETALLE_VENTA }o--|| PRODUCTO : "referencia"
+    VENTA ||--o{ DETALLE_VENTA_LOTE : "contiene"
+    DETALLE_VENTA_LOTE }o--|| PRODUCCION : "corresponde a"
+    PRODUCCION }o--o{ INSUMO : "consume"
+    PRODUCTO ||--o{ MOVIMIENTO_INVENTARIO : "registra"
+    USUARIO ||--o{ VENTA : "atiende"
+    VENTA }o--|| CIERRE_CAJA : "se resume en"

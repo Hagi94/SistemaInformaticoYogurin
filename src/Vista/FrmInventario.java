@@ -3,7 +3,7 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JFrame.java to edit this template
  */
 package Vista;
-import Dao.ProductoDAO;
+import controlador.ProductoControlador;
 import Modelo.Producto;
 import java.util.List;
 import javax.swing.table.DefaultTableModel;
@@ -14,7 +14,7 @@ import javax.swing.table.DefaultTableModel;
 public class FrmInventario extends javax.swing.JFrame {
     
     private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(FrmInventario.class.getName());
-    ProductoDAO dao = new ProductoDAO();
+    ProductoControlador control = new ProductoControlador(); // (luiggi) la vista solo habla con el controlador
     DefaultTableModel modelo = new DefaultTableModel();
     /**
      * Creates new form FrmInventario
@@ -40,7 +40,7 @@ public class FrmInventario extends javax.swing.JFrame {
 
     double totalInventario = 0;
 
-    List<Producto> lista = dao.listar();
+    List<Producto> lista = control.listar();
 
     for(Producto p : lista){
 
@@ -91,7 +91,7 @@ public class FrmInventario extends javax.swing.JFrame {
         btnExportar = new javax.swing.JButton();
         btnCerrar = new javax.swing.JButton();
 
-        setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
 
         jLabel1.setText("FILTRO DE INVENTARIO");
 

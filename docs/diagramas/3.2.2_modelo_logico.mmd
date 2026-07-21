@@ -1,0 +1,105 @@
+erDiagram
+    USUARIOS {
+        int id PK
+        varchar usuario UK
+        varchar clave
+        enum rol
+        tinyint estado
+    }
+
+    CLIENTES {
+        int id PK
+        varchar dni UK
+        varchar nombre
+        varchar telefono
+        varchar direccion
+        varchar correo
+    }
+
+    PRODUCTOS {
+        int id PK
+        varchar nombre
+        varchar descripcion
+        decimal precio
+        int stock
+        int stock_minimo
+        tinyint estado
+    }
+
+    INSUMOS {
+        int id PK
+        varchar nombre
+        varchar unidad
+        decimal stock_actual
+        decimal stock_minimo
+    }
+
+    PRODUCCION {
+        int id PK
+        date fecha
+        varchar lote
+        varchar sabor
+        int cantidad
+        varchar observacion
+        decimal precio_venta
+    }
+
+    PRODUCCION_INSUMO {
+        int id PK
+        int produccion_id FK
+        int insumo_id FK
+        decimal cantidad_usada
+    }
+
+    VENTAS {
+        int id PK
+        datetime fecha
+        int cliente_id FK
+        decimal total
+        decimal descuento
+        decimal total_pagar
+    }
+
+    DETALLE_VENTA {
+        int id PK
+        int venta_id FK
+        int producto_id FK
+        int cantidad
+        decimal precio_unitario
+        decimal subtotal
+    }
+
+    DETALLE_VENTA_LOTE {
+        int id PK
+        int venta_id FK
+        int produccion_id FK
+        varchar lote
+        int cantidad
+        decimal precio_unitario
+        decimal subtotal
+    }
+
+    MOVIMIENTOS_INVENTARIO {
+        int id PK
+        datetime fecha
+        varchar tipo
+        int producto_id FK
+        int cantidad
+        varchar observacion
+    }
+
+    CIERRE_CAJA {
+        int id PK
+        date fecha
+        decimal total_ventas
+        varchar observacion
+    }
+
+    CLIENTES ||--o{ VENTAS : "cliente_id"
+    VENTAS ||--|{ DETALLE_VENTA : "venta_id"
+    PRODUCTOS ||--o{ DETALLE_VENTA : "producto_id"
+    VENTAS ||--o{ DETALLE_VENTA_LOTE : "venta_id"
+    PRODUCCION ||--o{ DETALLE_VENTA_LOTE : "produccion_id"
+    PRODUCCION ||--o{ PRODUCCION_INSUMO : "produccion_id"
+    INSUMOS ||--o{ PRODUCCION_INSUMO : "insumo_id"
+    PRODUCTOS ||--o{ MOVIMIENTOS_INVENTARIO : "producto_id"

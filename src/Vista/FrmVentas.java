@@ -4,9 +4,9 @@
  */
 package Vista;
 
-import Dao.ClienteDAO;
-import Dao.ProductoDAO;
-import Dao.ProduccionDAO;
+import controlador.ClienteControlador;
+import controlador.ProductoControlador;
+import controlador.ProduccionControlador;
 import Modelo.Cliente;
 import Modelo.Producto;
 import Modelo.Produccion;
@@ -14,17 +14,17 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import javax.swing.JOptionPane;
 import javax.swing.table.DefaultTableModel;
-import Dao.VentaDAO;
+import controlador.VentaControlador;
 import Modelo.Venta;
 
 public class FrmVentas extends javax.swing.JFrame {
     
     DefaultTableModel modelo = new DefaultTableModel();
-    double totalVenta = 0;
-    ClienteDAO clienteDAO = new ClienteDAO();
-    ProductoDAO productoDAO = new ProductoDAO();
-    ProduccionDAO produccionDAO = new ProduccionDAO();
-    VentaDAO ventaDAO = new VentaDAO();
+    // La vista solo conversa con controladores, nunca con la capa DAO
+    ClienteControlador clienteControl = new ClienteControlador();
+    ProductoControlador productoControl = new ProductoControlador();
+    ProduccionControlador produccionControl = new ProduccionControlador();
+    VentaControlador ventaControl = new VentaControlador();   // (luiggi) mantiene el carrito y la transaccion
     
     private String tipoVenta = "PRODUCTO";
 
@@ -75,7 +75,7 @@ public class FrmVentas extends javax.swing.JFrame {
     private void cargarClientes() {
         cmbCliente.removeAllItems();
         cmbCliente.addItem("-- SELECCIONE --");
-        for (Cliente c : clienteDAO.listar()) {
+        for (Cliente c : clienteControl.listar()) {
             cmbCliente.addItem(c.getNombre());
         }
     }
@@ -83,7 +83,7 @@ public class FrmVentas extends javax.swing.JFrame {
     private void cargarProductos() {
         cmbProducto.removeAllItems();
         cmbProducto.addItem("-- SELECCIONE --");
-        for (Producto p : productoDAO.listar()) {
+        for (Producto p : productoControl.listar()) {
             if (p.getStock() > 0) {
                 cmbProducto.addItem(p.getNombre());
             }
@@ -93,7 +93,7 @@ public class FrmVentas extends javax.swing.JFrame {
     private void cargarLotes() {
         cmbLote.removeAllItems();
         cmbLote.addItem("-- SELECCIONE --");
-        for (Produccion prod : produccionDAO.listar()) {
+        for (Produccion prod : produccionControl.listar()) {
             if (prod.getCantidad() > 0) {
                 cmbLote.addItem(prod.getLote() + " - " + prod.getSabor() + " (Stock: " + prod.getCantidad() + ")");
             }
@@ -106,15 +106,80 @@ public class FrmVentas extends javax.swing.JFrame {
         txtFecha.setEditable(false);
     }
     
-    private void actualizarTotal() {
-        double descuento = 0;
-        if (!txtDescuento.getText().isEmpty()) {
-            descuento = Double.parseDouble(txtDescuento.getText());
+    /**
+     * Vuelve a pintar la tabla a partir del carrito que mantiene el controlador.
+     * La vista ya no lleva su propia copia de las lineas ni del total.
+     */
+    private void pintarCarrito() {
+
+        modelo.setRowCount(0);                               // (luiggi) limpia antes de repintar
+
+        for (Modelo.ItemVenta item : ventaControl.getCarrito()) {
+            modelo.addRow(new Object[]{
+                item.getIdItem(),
+                item.getDescripcion(),
+                item.getCantidad(),
+                item.getPrecioUnitario(),
+                item.getSubtotal(),
+                item.getTipo(),
+                item.getLote() == null ? "-" : item.getLote()
+            });
         }
-        double totalFinal = totalVenta - descuento;
-        txtTotal.setText(String.format("%.2f", totalFinal));
+        actualizarTotal();
+    }
+
+    private void actualizarTotal() {
+
+        controlador.Resultado r = ventaControl.validarDescuento(txtDescuento.getText());
+
+        // Si el descuento aun no es valido se muestra el total sin descontar
+        double descuento = r.esExito() ? Double.parseDouble(r.getMensaje()) : 0; // (luiggi) el controlador valida el texto
+
+        txtTotal.setText(String.format("%.2f", ventaControl.calcularTotalPagar(descuento)));
     }
     
+    /**
+     * Pregunta si se desea imprimir el comprobante de la venta recien registrada (RF-16).
+     * Si el usuario acepta, genera el PDF y lo abre.
+     */
+    private void ofrecerComprobante(int idVenta) {
+
+        int respuesta = JOptionPane.showConfirmDialog(this,
+                "Desea generar el comprobante de la venta N " + idVenta + "?",
+                "Comprobante", JOptionPane.YES_NO_OPTION);
+
+        if (respuesta != JOptionPane.YES_OPTION) {
+            return;                                              // (luiggi) el comprobante es opcional
+        }
+
+        controlador.ExportacionControlador exportar = new controlador.ExportacionControlador();
+
+        java.io.File destino = new java.io.File(
+                exportar.carpetaDocumentos(), exportar.nombreComprobante(idVenta));
+
+        controlador.Resultado r = exportar.generarComprobante(destino, idVenta);
+
+        JOptionPane.showMessageDialog(this, r.getMensaje(),
+                r.esExito() ? "Listo" : "Error",
+                r.esExito() ? JOptionPane.INFORMATION_MESSAGE : JOptionPane.ERROR_MESSAGE);
+
+        if (r.esExito()) {
+            abrirArchivo(destino);                               // (luiggi) lo muestra para imprimirlo
+        }
+    }
+
+    /** Abre el documento con el programa que el sistema tenga asociado. */
+    private void abrirArchivo(java.io.File archivo) {
+        try {
+            if (java.awt.Desktop.isDesktopSupported()) {
+                java.awt.Desktop.getDesktop().open(archivo);
+            }
+        } catch (java.io.IOException e) {
+            // No es un fallo de la venta: el archivo ya quedo guardado en disco
+            System.err.println("No se pudo abrir el documento: " + e.getMessage());
+        }
+    }
+
     private void calcularSubtotal() {
         try {
             int cantidad = Integer.parseInt(txtCantidad.getText());
@@ -137,78 +202,48 @@ public class FrmVentas extends javax.swing.JFrame {
             cmbLote.setSelectedIndex(0);
         }
     }
-      private void agregarProducto() {
+    /** Agrega al carrito el producto elegido. El controlador valida cantidad y stock. */
+    private void agregarProducto() {
+
         if (cmbProducto.getSelectedIndex() <= 0) {
             JOptionPane.showMessageDialog(this, "Seleccione un producto");
             return;
         }
-        
-        String productoNombre = cmbProducto.getSelectedItem().toString();
-        int cantidad = Integer.parseInt(txtCantidad.getText());
-        double precio = Double.parseDouble(txtPrecio.getText());
-        
-        Producto p = productoDAO.buscarPorNombre(productoNombre);
-        
-        if (cantidad > p.getStock()) {
-            JOptionPane.showMessageDialog(this, "Stock insuficiente. Stock disponible: " + p.getStock());
-            return;
+
+        Producto p = productoControl.buscarPorNombre(cmbProducto.getSelectedItem().toString());
+
+        controlador.Resultado r = ventaControl.agregarProducto(p, txtCantidad.getText());
+
+        if (!r.esExito()) {
+            JOptionPane.showMessageDialog(this, r.getMensaje());
+            return;                                          // (luiggi) el controlador explica que falto
         }
-        
-        double subtotal = cantidad * precio;
-        
-        Object datos[] = {
-            p.getId(),
-            productoNombre,
-            cantidad,
-            precio,
-            subtotal,
-            "PRODUCTO",
-            "-"
-        };
-        
-        modelo.addRow(datos);
-        totalVenta += subtotal;
-        actualizarTotal();
-        
+
+        pintarCarrito();                                     // (luiggi) la tabla se redibuja desde el carrito
         txtCantidad.setText("");
         txtSubtotal.setText("");
         cmbProducto.setSelectedIndex(0);
     }
-    
+
+    /** Agrega al carrito el lote elegido. El controlador valida cantidad y unidades. */
     private void agregarLote() {
+
         if (cmbLote.getSelectedIndex() <= 0) {
             JOptionPane.showMessageDialog(this, "Seleccione un lote");
             return;
         }
-        
-        String seleccion = cmbLote.getSelectedItem().toString();
-        String loteNombre = seleccion.split(" - ")[0];
-        int cantidad = Integer.parseInt(txtCantidad.getText());
-        double precio = Double.parseDouble(txtPrecio.getText());
-        
-        Produccion prod = produccionDAO.buscarPorLote(loteNombre);
-        
-        if (cantidad > prod.getCantidad()) {
-            JOptionPane.showMessageDialog(this, "Stock insuficiente. Stock disponible: " + prod.getCantidad());
+
+        String loteNombre = cmbLote.getSelectedItem().toString().split(" - ")[0];
+        Produccion prod = produccionControl.buscarPorLote(loteNombre);
+
+        controlador.Resultado r = ventaControl.agregarLote(prod, txtCantidad.getText());
+
+        if (!r.esExito()) {
+            JOptionPane.showMessageDialog(this, r.getMensaje());
             return;
         }
-        
-        double subtotal = cantidad * precio;
-        
-        Object datos[] = {
-            prod.getId(),
-            prod.getSabor() + " (Lote: " + prod.getLote() + ")",
-            cantidad,
-            precio,
-            subtotal,
-            "LOTE",
-            prod.getLote()
-        };
-        
-        modelo.addRow(datos);
-        totalVenta += subtotal;
-        actualizarTotal();
-        
+
+        pintarCarrito();
         txtCantidad.setText("");
         txtSubtotal.setText("");
         cmbLote.setSelectedIndex(0);
@@ -268,7 +303,7 @@ public class FrmVentas extends javax.swing.JFrame {
         ));
         jScrollPane1.setViewportView(jTable1);
 
-        setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         getContentPane().setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
         jLabel1.setText("DATOS DE LA VENTA");
@@ -369,7 +404,7 @@ public class FrmVentas extends javax.swing.JFrame {
         btnRegresar.addActionListener(this::btnRegresarActionPerformed);
         getContentPane().add(btnRegresar, new org.netbeans.lib.awtextra.AbsoluteConstraints(402, 304, -1, -1));
 
-        lgoVentas.setIcon(new javax.swing.ImageIcon("D:\\ProyectosNetbeans\\SistemaInformatico\\src\\Imagenes\\Botones\\LogoNaranja.png")); // NOI18N
+        lgoVentas.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Imagenes/Botones/LogoNaranja.png"))); // NOI18N
         getContentPane().add(lgoVentas, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 1230, 350));
 
         pack();
@@ -405,81 +440,48 @@ try {
     }//GEN-LAST:event_txtDescuentoActionPerformed
 
     private void btnRegistrarVentaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnRegistrarVentaActionPerformed
-if (modelo.getRowCount() == 0) {
-            JOptionPane.showMessageDialog(this, "Agregue productos a la venta");
+        // Toda la validacion la hace el controlador; la vista solo entrega los datos escritos
+        controlador.Resultado descuentoValido = ventaControl.validarDescuento(txtDescuento.getText());
+
+        if (!descuentoValido.esExito()) {
+            JOptionPane.showMessageDialog(this, descuentoValido.getMensaje());
+            return;                                              // (luiggi) descuento mal escrito o mayor al total
+        }
+
+        int idCliente = txtIdCliente.getText().isBlank()
+                ? 0
+                : Integer.parseInt(txtIdCliente.getText());      // (luiggi) 0 = sin cliente elegido
+
+        double descuento = Double.parseDouble(descuentoValido.getMensaje());
+
+        controlador.Resultado r = ventaControl.registrarVenta(idCliente, descuento); // (luiggi) transaccion: todo o nada
+
+        JOptionPane.showMessageDialog(this, r.getMensaje(),
+                r.esExito() ? "Listo" : "Atencion",
+                r.esExito() ? JOptionPane.INFORMATION_MESSAGE : JOptionPane.WARNING_MESSAGE);
+
+        if (!r.esExito()) {
             return;
         }
-        
-        if (txtIdCliente.getText().isEmpty() || cmbCliente.getSelectedIndex() <= 0) {
-            JOptionPane.showMessageDialog(this, "Seleccione un cliente");
-            return;
-        }
-        
-        Venta venta = new Venta();
-        venta.setClienteId(Integer.parseInt(txtIdCliente.getText()));
-        venta.setTotal(totalVenta);
-        
-        double descuento = 0;
-        if (!txtDescuento.getText().isEmpty()) {
-            descuento = Double.parseDouble(txtDescuento.getText());
-        }
-        
-        venta.setDescuento(descuento);
-        venta.setTotalPagar(totalVenta - descuento);
-        
-        int idVenta = ventaDAO.guardarVenta(venta);
-        if(idVenta <= 0){
-    JOptionPane.showMessageDialog(this,
-            "Error al registrar la venta");
-    return;
-}
-        System.out.println("ID VENTA: " + idVenta);
-        for (int i = 0; i < tblDetalleVenta.getRowCount(); i++) {
-            
-            String tipo = tblDetalleVenta.getValueAt(i, 5).toString();
-            int idItem = Integer.parseInt(tblDetalleVenta.getValueAt(i, 0).toString());
-            int cantidad = Integer.parseInt(tblDetalleVenta.getValueAt(i, 2).toString());
-            double precio = Double.parseDouble(tblDetalleVenta.getValueAt(i, 3).toString());
-            double subtotal = Double.parseDouble(tblDetalleVenta.getValueAt(i, 4).toString());
-            
-            if (tipo.equals("PRODUCTO")) {
-                ventaDAO.guardarDetalle(idVenta, idItem, cantidad, precio, subtotal);
-                ventaDAO.descontarStock(idItem, cantidad);
-                ventaDAO.registrarMovimiento(idItem, cantidad);
-            } else {
-                String lote = tblDetalleVenta.getValueAt(i, 6).toString();
-                ventaDAO.guardarDetalleLote(idVenta, idItem, lote, cantidad, precio, subtotal);
-                ventaDAO.descontarStockLote(idItem, cantidad);
-            }
-  System.out.println(
-        tblDetalleVenta.getValueAt(i, 0)
-        + " | "
-        + tblDetalleVenta.getValueAt(i, 1)
-        + " | "
-        + tblDetalleVenta.getValueAt(i, 5)
-);
-        }
-        
-        JOptionPane.showMessageDialog(null, "✅ Venta registrada correctamente\nTotal: S/ " + String.format("%.2f", totalVenta - descuento));
-        
-        modelo.setRowCount(0);
+
+        ofrecerComprobante(ventaControl.getUltimoIdVenta());      // (luiggi) comprobante para el cliente (RF-16)
+
+        pintarCarrito();                                         // (luiggi) el carrito quedo vacio tras registrar
         txtCantidad.setText("");
         txtSubtotal.setText("");
         txtTotal.setText("");
         txtDescuento.setText("");
-        totalVenta = 0;
         cargarProductos();
         cargarLotes();
     }//GEN-LAST:event_btnRegistrarVentaActionPerformed
 
     private void btnCancelarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCancelarActionPerformed
 
-        modelo.setRowCount(0);
+        ventaControl.cancelarVenta();      // (luiggi) vacia el carrito que mantiene el controlador
+        pintarCarrito();
         txtCantidad.setText("");
         txtSubtotal.setText("");
-        txtTotal.setText("");
         txtDescuento.setText("");
-        totalVenta = 0;
     }//GEN-LAST:event_btnCancelarActionPerformed
 
     private void cmbProductoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmbProductoActionPerformed
@@ -488,7 +490,7 @@ if (modelo.getRowCount() == 0) {
         }
         tipoVenta = "PRODUCTO";
         String nombre = cmbProducto.getSelectedItem().toString();
-        Producto p = productoDAO.buscarPorNombre(nombre);
+        Producto p = productoControl.buscarPorNombre(nombre);
         txtPrecio.setText(String.valueOf(p.getPrecio()));
         calcularSubtotal();
     }//GEN-LAST:event_cmbProductoActionPerformed
@@ -514,7 +516,7 @@ if (modelo.getRowCount() == 0) {
         tipoVenta = "LOTE";
         String seleccion = cmbLote.getSelectedItem().toString();
         String lote = seleccion.split(" - ")[0];
-        Produccion prod = produccionDAO.buscarPorLote(lote);
+        Produccion prod = produccionControl.buscarPorLote(lote);
 if (prod != null) {
     txtPrecio.setText(String.valueOf(prod.getPrecioVenta()));
 }
@@ -527,7 +529,7 @@ if (cmbCliente.getSelectedItem() == null || cmbCliente.getSelectedIndex() <= 0) 
             return;
         }
         String nombre = cmbCliente.getSelectedItem().toString();
-        Cliente c = clienteDAO.buscarPorNombre(nombre);
+        Cliente c = clienteControl.buscarPorNombre(nombre);
         if (c != null) {
             txtIdCliente.setText(String.valueOf(c.getId()));
         }
@@ -546,11 +548,8 @@ if (cmbCliente.getSelectedItem() == null || cmbCliente.getSelectedIndex() <= 0) 
     }//GEN-LAST:event_rbLoteActionPerformed
 
     private void btnRegresarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnRegresarActionPerformed
-     MenuPrincipal menu = new MenuPrincipal();
-     menu.setVisible(true);
-     
-     this.dispose(); // 
-// TODO add your handling code here:
+        // El menu principal sigue abierto detras; crear otro lo duplicaba
+        this.dispose();   // (luiggi) solo cierra esta ventana y vuelve al menu
     }//GEN-LAST:event_btnRegresarActionPerformed
 
     /**

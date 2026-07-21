@@ -1,0 +1,101 @@
+classDiagram
+    direction LR
+
+    class Usuario {
+        -int id
+        -String usuario
+        -String clave
+        -String rol
+        -boolean estado
+        +getRol() String
+        +isEstado() boolean
+    }
+
+    class Cliente {
+        -int id
+        -String dni
+        -String nombre
+        -String telefono
+        -String direccion
+        -String correo
+    }
+
+    class Producto {
+        -int id
+        -String nombre
+        -String descripcion
+        -double precio
+        -int stock
+        -int stockMinimo
+        -boolean estado
+    }
+
+    class Insumo {
+        -int id
+        -String nombre
+        -String unidad
+        -double stockActual
+        -double stockMinimo
+    }
+
+    class Produccion {
+        -int id
+        -String fecha
+        -String lote
+        -String sabor
+        -int cantidad
+        -double precioVenta
+        -String observacion
+    }
+
+    class Venta {
+        -int id
+        -Date fecha
+        -int clienteId
+        -double total
+        -double descuento
+        -double totalPagar
+    }
+
+    class DetalleVenta {
+        -int ventaId
+        -int productoId
+        -int cantidad
+        -double precioUnitario
+        -double subtotal
+    }
+
+    class ItemVenta {
+        -String tipo
+        -int idItem
+        -String descripcion
+        -String lote
+        -int cantidad
+        -double precioUnitario
+        -double subtotal
+        +esProducto() boolean
+    }
+
+    class MovimientoInventario {
+        -int id
+        -Date fecha
+        -String tipo
+        -int productoId
+        -int cantidad
+        -String observacion
+    }
+
+    class CierreCaja {
+        -int id
+        -Date fecha
+        -double totalVentas
+        -String observacion
+    }
+
+    Cliente "1" --> "0..*" Venta : genera
+    Venta "1" *-- "1..*" DetalleVenta : contiene
+    DetalleVenta "0..*" --> "1" Producto : referencia
+    Venta "1" o-- "0..*" ItemVenta : arma
+    Produccion "0..*" --> "0..*" Insumo : consume
+    Producto "1" --> "0..*" MovimientoInventario : registra
+    Usuario "1" --> "0..*" Venta : atiende

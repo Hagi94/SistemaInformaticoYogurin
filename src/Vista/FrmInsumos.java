@@ -15,8 +15,192 @@ public class FrmInsumos extends javax.swing.JFrame {
     /**
      * Creates new form FrmInsumos
      */
+    private final controlador.InsumoControlador control = new controlador.InsumoControlador(); // (luiggi) la vista solo habla con el controlador
+    private int idSeleccionado = 0;                          // (luiggi) 0 = no hay insumo elegido
+
     public FrmInsumos() {
         initComponents();
+        prepararPantalla();                                  // (luiggi) conecta la interfaz con el controlador
+        listarInsumos();
+        listarAlertas();
+    }
+
+    /** Configura tablas, botones y menu sin modificar el codigo generado por NetBeans. */
+    private void prepararPantalla() {
+
+        setTitle("Gestion de Insumos");
+        setLocationRelativeTo(null);                         // (luiggi) centra la ventana
+        setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE); // (luiggi) cerrar no apaga el sistema
+
+        limpiarCampos();
+
+        btnGuardar.addActionListener(e -> guardarInsumo());   // (luiggi) alta de insumo (RF-07)
+        btnModificar.addActionListener(e -> modificarInsumo());
+
+        // Al hacer clic en una fila se cargan sus datos en el formulario
+        jTable2.getSelectionModel().addListSelectionListener(e -> {
+            if (!e.getValueIsAdjusting()) {
+                cargarSeleccion();                            // (luiggi) pasa la fila elegida a los campos
+            }
+        });
+
+        construirMenu();
+    }
+
+    /** Menu superior con la entrada de compras y el refresco de alertas. */
+    private void construirMenu() {
+
+        javax.swing.JMenuBar barra = new javax.swing.JMenuBar();
+        javax.swing.JMenu menu = new javax.swing.JMenu("Operaciones");
+
+        javax.swing.JMenuItem itemEntrada = new javax.swing.JMenuItem("Registrar entrada de compra");
+        itemEntrada.addActionListener(e -> registrarEntrada());  // (luiggi) suma stock por compra (RF-08)
+
+        javax.swing.JMenuItem itemRefrescar = new javax.swing.JMenuItem("Actualizar listas");
+        itemRefrescar.addActionListener(e -> { listarInsumos(); listarAlertas(); });
+
+        menu.add(itemEntrada);
+        menu.add(itemRefrescar);
+        barra.add(menu);
+        setJMenuBar(barra);                                   // (luiggi) el menu no altera el layout del formulario
+    }
+
+    // ------------------------------------------------------------------
+    // Listados
+    // ------------------------------------------------------------------
+
+    /** Carga todos los insumos en la tabla principal. */
+    private void listarInsumos() {
+
+        String[] columnas = {"ID", "Nombre", "Unidad", "Stock Actual", "Stock Minimo"};
+        javax.swing.table.DefaultTableModel modelo =
+                new javax.swing.table.DefaultTableModel(null, columnas) {
+            @Override
+            public boolean isCellEditable(int f, int c) {
+                return false;                                 // (luiggi) el stock solo cambia por operaciones
+            }
+        };
+
+        for (Modelo.Insumo i : control.listar()) {
+            modelo.addRow(new Object[]{
+                i.getId(), i.getNombre(), i.getUnidad(), i.getStockActual(), i.getStockMinimo()
+            });
+        }
+        jTable2.setModel(modelo);
+    }
+
+    /** Carga en la tabla superior los insumos que llegaron al stock minimo (RF-18). */
+    private void listarAlertas() {
+
+        String[] columnas = {"ALERTA - Insumo", "Unidad", "Actual", "Minimo"};
+        javax.swing.table.DefaultTableModel modelo =
+                new javax.swing.table.DefaultTableModel(null, columnas) {
+            @Override
+            public boolean isCellEditable(int f, int c) {
+                return false;
+            }
+        };
+
+        java.util.List<Modelo.Insumo> criticos = control.listarStockCritico();
+
+        for (Modelo.Insumo i : criticos) {
+            modelo.addRow(new Object[]{
+                i.getNombre(), i.getUnidad(), i.getStockActual(), i.getStockMinimo()
+            });
+        }
+        jTable1.setModel(modelo);
+
+        jTable1.setBackground(criticos.isEmpty()               // (luiggi) rojo suave solo si hay faltantes
+                ? java.awt.Color.WHITE
+                : new java.awt.Color(255, 228, 228));
+    }
+
+    // ------------------------------------------------------------------
+    // Operaciones
+    // ------------------------------------------------------------------
+
+    /** Registra un insumo nuevo (RF-07). */
+    private void guardarInsumo() {
+
+        // La vista entrega el texto tal cual; el controlador valida y decide
+        mostrar(control.registrar(                            // (luiggi) delega la validacion al controlador
+                txtNombre.getText(), txtUnidad.getText(),
+                txtStockActual.getText(), txtStockMinimo.getText()));
+    }
+
+    /** Modifica el insumo seleccionado en la tabla. */
+    private void modificarInsumo() {
+
+        mostrar(control.modificar(idSeleccionado,
+                txtNombre.getText(), txtUnidad.getText(),
+                txtStockActual.getText(), txtStockMinimo.getText()));
+    }
+
+    /** Suma al stock la cantidad comprada de un insumo (RF-08). */
+    private void registrarEntrada() {
+
+        if (idSeleccionado == 0) {
+            javax.swing.JOptionPane.showMessageDialog(this, "Seleccione primero el insumo comprado");
+            return;                                           // (luiggi) sin seleccion no tiene que preguntar nada
+        }
+
+        String texto = javax.swing.JOptionPane.showInputDialog(this,
+                "Cantidad comprada de " + txtNombre.getText() + " (" + txtUnidad.getText() + "):");
+
+        if (texto == null) {
+            return;                                           // (luiggi) el usuario cancelo el dialogo
+        }
+
+        mostrar(control.registrarEntrada(idSeleccionado, texto));
+    }
+
+    /**
+     * Muestra el mensaje del controlador y refresca las listas si la operacion salio bien.
+     * Concentra aqui lo que antes se repetia en cada metodo.
+     */
+    private void mostrar(controlador.Resultado r) {
+
+        javax.swing.JOptionPane.showMessageDialog(this, r.getMensaje(),
+                r.esExito() ? "Listo" : "Atencion",
+                r.esExito() ? javax.swing.JOptionPane.INFORMATION_MESSAGE
+                            : javax.swing.JOptionPane.WARNING_MESSAGE); // (luiggi) el icono depende del resultado
+
+        if (r.esExito()) {
+            limpiarCampos();
+            listarInsumos();
+            listarAlertas();                                  // (luiggi) refresca alertas tras cada cambio
+        }
+    }
+
+    // ------------------------------------------------------------------
+    // Formulario
+    // ------------------------------------------------------------------
+
+    // La validacion de los campos ya no vive aqui: la hace InsumoControlador
+
+    /** Pasa la fila seleccionada de la tabla al formulario. */
+    private void cargarSeleccion() {
+
+        int fila = jTable2.getSelectedRow();
+        if (fila < 0) {
+            return;
+        }
+
+        idSeleccionado = Integer.parseInt(jTable2.getValueAt(fila, 0).toString()); // (luiggi) recuerda que insumo se edita
+        txtNombre.setText(jTable2.getValueAt(fila, 1).toString());
+        txtUnidad.setText(jTable2.getValueAt(fila, 2).toString());
+        txtStockActual.setText(jTable2.getValueAt(fila, 3).toString());
+        txtStockMinimo.setText(jTable2.getValueAt(fila, 4).toString());
+    }
+
+    /** Deja el formulario en blanco y sin insumo seleccionado. */
+    private void limpiarCampos() {
+        idSeleccionado = 0;                                   // (luiggi) vuelve al modo alta
+        txtNombre.setText("");
+        txtUnidad.setText("");
+        txtStockActual.setText("0");
+        txtStockMinimo.setText("0");
+        jTable2.clearSelection();
     }
 
     /**
@@ -160,11 +344,25 @@ public class FrmInsumos extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void btnEliminarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnEliminarActionPerformed
-        // TODO add your handling code here:
+
+        if (idSeleccionado == 0) {
+            javax.swing.JOptionPane.showMessageDialog(this, "Seleccione un insumo de la tabla");
+            return;                                           // (luiggi) evita borrar sin seleccion
+        }
+
+        int confirma = javax.swing.JOptionPane.showConfirmDialog(this,
+                "Eliminar el insumo \"" + txtNombre.getText() + "\"?",
+                "Confirmar", javax.swing.JOptionPane.YES_NO_OPTION); // (luiggi) pide confirmacion antes de borrar
+
+        if (confirma != javax.swing.JOptionPane.YES_OPTION) {
+            return;
+        }
+
+        mostrar(control.eliminar(idSeleccionado));   // (luiggi) el controlador decide y explica el resultado
     }//GEN-LAST:event_btnEliminarActionPerformed
 
     private void txtStockActualActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtStockActualActionPerformed
-        // TODO add your handling code here:
+        txtStockMinimo.requestFocus();   // (luiggi) Enter salta al siguiente campo
     }//GEN-LAST:event_txtStockActualActionPerformed
 
     /**
